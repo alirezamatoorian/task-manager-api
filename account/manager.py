@@ -5,10 +5,10 @@ class UserManager(BaseUserManager):
     def create_user(self, phone, password=None, **extra_fields):
         if not phone:
             raise ValueError("phone most be enter")
-        user = self.model(phone=phone, **extra_fields)
-        user.set_password(password)
         extra_fields.setdefault("is_staff", False)
         extra_fields.setdefault("is_superuser", False)
+        user = self.model(phone=phone, **extra_fields)
+        user.set_password(password)
         user.save(using=self._db)
         return user
 
