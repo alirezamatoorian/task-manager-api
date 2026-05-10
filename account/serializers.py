@@ -10,9 +10,15 @@ class SignUpSerializer(serializers.ModelSerializer):
         fields = ["phone", "password", "password2"]
         extra_kwargs = {"password": {'write_only': True}}
 
+    def validate_phone(self, value):
+        if len(value) != 11:
+            raise serializers.ValidationError("phone most be 11 digits")
+        return value
+
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError("password and password2 not equal")
+        return attrs
 
     def create(self, validated_data):
         validated_data.pop("password2")
