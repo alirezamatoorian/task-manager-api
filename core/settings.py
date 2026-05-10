@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import cast
 
 from decouple import config
+from django.conf.global_settings import AUTH_USER_MODEL
 
 import task_manager.apps
 
@@ -123,6 +124,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+AUTH_USER_MODEL = 'account.User'
+
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Task Manager API",
