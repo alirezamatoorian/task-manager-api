@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth.password_validation import validate_password
 from .models import User
 
 
@@ -12,7 +13,9 @@ class SignUpSerializer(serializers.ModelSerializer):
 
     def validate_phone(self, value):
         if len(value) != 11:
-            raise serializers.ValidationError("phone most be 11 digits")
+            raise serializers.ValidationError("phone must be 11 digits")
+        if not value.is_digit():
+            raise serializers.ValidationError("phone must be digit")
         return value
 
     def validate(self, attrs):

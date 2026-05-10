@@ -10,5 +10,5 @@ User = get_user_model()
 
 
 class SignUpView(CreateAPIView):
-    model = User
+    queryset = User.objects.all()
     serializer_class = SignUpSerializer
