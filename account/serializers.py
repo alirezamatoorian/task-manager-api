@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from .models import User
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -39,7 +41,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True)
-    confirm_new_password=serializers.CharField(write_only=True)
+    confirm_new_password = serializers.CharField(write_only=True)
 
     def validate_old_password(self, value):
         user = self.context['request'].user
@@ -61,3 +63,17 @@ class ChangePasswordSerializer(serializers.Serializer):
         user.save()
         return user
 
+
+class LogoutSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField()
+
+    def validate(self, attrs):
+        self.token = attrs["refresh_token"]
+        return attrs
+
+    def save(self, **kwargs):
+        try:
+            refresh_toke = RefreshToken(self.token)
+            refresh_toke.blacklist()
+        except TokenError:
+            raise serializers.ValidationError({"detail": "Token is invalid or expired"})
