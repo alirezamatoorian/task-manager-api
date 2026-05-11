@@ -34,3 +34,30 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = ["phone", "email", "first_name", "last_name", "date_joined"]
         read_only_fields = ["phone", "date_joined"]
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
+    confirm_new_password=serializers.CharField(write_only=True)
+
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("The current password is incorrect.")
+        return value
+
+    def validate(self, attrs):
+        if attrs["old_password"] == attrs["new_password"]:
+            raise serializers.ValidationError("The new password is the same as the current password.")
+        if attrs["new_password"] != attrs["confirm_new_password"]:
+            raise serializers.ValidationError("new password and confirm password not equal")
+        return attrs
+
+    def save(self):
+        user = self.context["request"].user
+        new_password = self.validated_data["new_password"]
+        user.set_password(new_password)
+        user.save()
+        return user
+
