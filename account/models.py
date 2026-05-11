@@ -8,9 +8,9 @@ from .manager import UserManager
 
 class User(AbstractBaseUser, PermissionsMixin):
     phone = models.CharField(max_length=11, unique=True)
-    email = models.EmailField()
-    first_name = models.CharField(max_length=20)
-    last_name = models.CharField(max_length=20)
+    email = models.EmailField(blank=True,null=True)
+    first_name = models.CharField(max_length=20,blank=True,null=True)
+    last_name = models.CharField(max_length=20,blank=True,null=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
