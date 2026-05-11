@@ -20,6 +20,10 @@ class SignUpSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("phone must be digit")
         return value
 
+    def validate_password(self, value):
+        validate_password(value)
+        return value
+
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError("password and password2 not equal")
@@ -47,6 +51,10 @@ class ChangePasswordSerializer(serializers.Serializer):
         user = self.context['request'].user
         if not user.check_password(value):
             raise serializers.ValidationError("The current password is incorrect.")
+        return value
+
+    def validate_new_password(self, value):
+        validate_password(value)
         return value
 
     def validate(self, attrs):
