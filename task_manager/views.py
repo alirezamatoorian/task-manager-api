@@ -1,8 +1,9 @@
-from django.template.context_processors import request
 from rest_framework.viewsets import ModelViewSet
 from .serializers import TaskSerializer
 from .models import Task
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 # Create your views here.
@@ -11,6 +12,10 @@ from rest_framework.permissions import IsAuthenticated
 class TaskViewSet(ModelViewSet):
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ["status", "priority","created_by"]
+    search_fields = ["title"]
+    ordering_fields = ["created_at"]
 
     def perform_create(self, serializer):
         return serializer.save(created_by=self.request.user)
