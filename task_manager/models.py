@@ -17,7 +17,7 @@ class Task(models.Model):
         LOW = "low", "low"
         MEDIUM = "medium", "medium"
         HIGH = "high", "high"
-        URGENT = "urgent"
+        URGENT = "urgent", "urgent"
 
     title = models.CharField(max_length=200)
     description = models.TextField()
@@ -26,8 +26,8 @@ class Task(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tasks")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    due_date = models.DateTimeField()
-    completed_at = models.DateTimeField()
+    due_date = models.DateTimeField(blank=True, null=True)
+    completed_at = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.title
