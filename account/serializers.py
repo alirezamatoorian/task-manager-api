@@ -16,7 +16,7 @@ class SignUpSerializer(serializers.ModelSerializer):
     def validate_phone(self, value):
         if len(value) != 11:
             raise serializers.ValidationError("phone must be 11 digits")
-        if not value.is_digit():
+        if not value.isdigit():
             raise serializers.ValidationError("phone must be digit")
         return value
 
