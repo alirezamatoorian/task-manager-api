@@ -4,6 +4,7 @@ from .models import Task
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from .pagination import TaskPagination
 
 
 # Create your views here.
@@ -16,6 +17,7 @@ class TaskViewSet(ModelViewSet):
     filterset_fields = ["status", "priority"]
     search_fields = ["title"]
     ordering_fields = ["created_at"]
+    pagination_class = TaskPagination
 
     def perform_create(self, serializer):
         return serializer.save(created_by=self.request.user)
