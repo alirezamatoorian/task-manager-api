@@ -18,11 +18,10 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/task-manager/", include('task_manager.urls', namespace='task_manager')),
-    path("api/account/",include('account.urls',namespace='account')),
+    path("api/account/", include('account.urls', namespace='account')),
 
     #swagger
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
