@@ -6,16 +6,26 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
+class AssignedToMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "phone"]
+
+
 class TaskSerializer(serializers.ModelSerializer):
-    assigned_to = serializers.PrimaryKeyRelatedField(
+    assigned_to = AssignedToMiniSerializer(read_only=True, many=True)
+    assigned_to_ids = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=User.objects.all(),
-        required=False
+        required=False,
+        source="assigned_to",
+        write_only=True
     )
 
     class Meta:
         model = Task
-        fields = ["id", "title", "description", "created_by", "assigned_to", "status", "priority", "created_at",
+        fields = ["id", "title", "description", "created_by", "assigned_to", "assigned_to_ids", "status", "priority",
+                  "created_at",
                   "updated_at",
                   "due_date", "completed_at"]
         read_only_fields = ["id", "created_by", "created_at", "updated_at"]
