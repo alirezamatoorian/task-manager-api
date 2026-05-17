@@ -30,6 +30,22 @@ class TaskSerializer(serializers.ModelSerializer):
                   "due_date", "completed_at"]
         read_only_fields = ["id", "created_by", "created_at", "updated_at"]
 
+    def validate(self, attrs):
+        user = self.context["request"].user
+        task = self.instance
+        allowed_fields = {"status"}
+        incoming_fields = set(attrs.keys())
+        if self.instance:
+            if task.created_by == user:
+                return attrs
+            if user in task.assigned_to.all():
+                if incoming_fields.issubset(allowed_fields):
+                    return attrs
+                raise serializers.ValidationError("assign user only can change status")
+            raise serializers.ValidationError(
+                "You do not have permission to perform this action."
+            )
+
     def update(self, instance, validated_data):
         old_status = instance.status
         task = super().update(instance, validated_data)
