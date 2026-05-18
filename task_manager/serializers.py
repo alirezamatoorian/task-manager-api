@@ -12,6 +12,13 @@ class AssignedToMiniSerializer(serializers.ModelSerializer):
         fields = ["id", "phone"]
 
 
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ["id", "content", "author", "task", "created_at"]
+        read_only_fields = ["id", "created_at", "author", "task"]
+
+
 class TaskSerializer(serializers.ModelSerializer):
     assigned_to = AssignedToMiniSerializer(read_only=True, many=True)
     assigned_to_ids = serializers.PrimaryKeyRelatedField(
@@ -21,13 +28,14 @@ class TaskSerializer(serializers.ModelSerializer):
         source="assigned_to",
         write_only=True
     )
+    comments = CommentSerializer(many=True)
 
     class Meta:
         model = Task
         fields = ["id", "title", "description", "created_by", "assigned_to", "assigned_to_ids", "status", "priority",
                   "created_at",
                   "updated_at",
-                  "due_date", "completed_at"]
+                  "due_date", "comments", "completed_at"]
         read_only_fields = ["id", "created_by", "created_at", "updated_at"]
 
     def validate(self, attrs):
@@ -45,6 +53,7 @@ class TaskSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "You do not have permission to perform this action."
             )
+        return attrs
 
     def update(self, instance, validated_data):
         old_status = instance.status
@@ -56,10 +65,3 @@ class TaskSerializer(serializers.ModelSerializer):
             task.completed_at = None
         task.save()
         return task
-
-
-class CommentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Comment
-        fields = ["content", "author", "task", "created_at"]
-        read_only_fields = ["created_at", "author", "task"]

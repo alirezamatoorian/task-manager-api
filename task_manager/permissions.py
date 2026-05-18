@@ -10,3 +10,10 @@ class IsCreatorOrReadOnly(BasePermission):
         if request.method in ["PUT", "PATCH"]:
             return obj.created_by == request.user or request.user in obj.assigned_to.all()
         return False
+
+
+class OnlyAuthorCanDeleteOrUpdateComment(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method == "DELETE" or request.method in ["PUT", "PATCH"]:
+            return obj.author == request.user
+        return False
