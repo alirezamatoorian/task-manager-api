@@ -1,5 +1,5 @@
 from rest_framework.viewsets import ModelViewSet
-from .serializers import TaskSerializer
+from .serializers import TaskSerializer, CommentSerializer
 from .models import Task
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsCreatorOrReadOnly
@@ -27,3 +27,11 @@ class TaskViewSet(ModelViewSet):
     def get_queryset(self):
         return (Task.objects.filter(Q(created_by=self.request.user) | Q(assigned_to=self.request.user)).
                 prefetch_related("assigned_to"))
+
+
+class CommentViewSet(ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        return serializer.save(author=self.request.user)

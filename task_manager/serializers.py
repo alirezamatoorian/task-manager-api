@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Task
+from .models import Task, Comment
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
@@ -33,12 +33,12 @@ class TaskSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         user = self.context["request"].user
         task = self.instance
-        allowed_fields = {"status"}
-        incoming_fields = set(attrs.keys())
         if self.instance:
             if task.created_by == user:
                 return attrs
             if user in task.assigned_to.all():
+                allowed_fields = {"status"}
+                incoming_fields = set(attrs.keys())
                 if incoming_fields.issubset(allowed_fields):
                     return attrs
                 raise serializers.ValidationError("assign user only can change status")
@@ -56,3 +56,10 @@ class TaskSerializer(serializers.ModelSerializer):
             task.completed_at = None
         task.save()
         return task
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ["content", "author", "task", "created_at"]
+        read_only_fields = ["created_at", "author", "task"]
