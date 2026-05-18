@@ -1,4 +1,6 @@
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import BasePermission, SAFE_METHODS
+from .models import Task
 
 
 class IsCreatorOrReadOnly(BasePermission):
@@ -12,8 +14,18 @@ class IsCreatorOrReadOnly(BasePermission):
         return False
 
 
+class IsTaskCreatorOrAssignee(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        task = view.get_task()
+        if task.created_by == request.user or request.user in task.assigned_to.all():
+            return True
+        return False
+
+
 class OnlyAuthorCanDeleteOrUpdateComment(BasePermission):
     def has_object_permission(self, request, view, obj):
-        if request.method == "DELETE" or request.method in ["PUT", "PATCH"]:
+        if request.method not in SAFE_METHODS:
             return obj.author == request.user
         return False

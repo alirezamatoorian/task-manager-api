@@ -28,7 +28,7 @@ class TaskSerializer(serializers.ModelSerializer):
         source="assigned_to",
         write_only=True
     )
-    comments = CommentSerializer(many=True)
+    comments = CommentSerializer(many=True,read_only=True)
 
     class Meta:
         model = Task

@@ -3,7 +3,7 @@ from rest_framework.viewsets import ModelViewSet
 from .serializers import TaskSerializer, CommentSerializer
 from .models import Task, Comment
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsCreatorOrReadOnly, OnlyAuthorCanDeleteOrUpdateComment
+from .permissions import IsCreatorOrReadOnly, IsTaskCreatorOrAssignee, OnlyAuthorCanDeleteOrUpdateComment
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import TaskPagination
@@ -27,19 +27,23 @@ class TaskViewSet(ModelViewSet):
 
     def get_queryset(self):
         return (Task.objects.filter(Q(created_by=self.request.user) | Q(assigned_to=self.request.user)).distinct().
-                prefetch_related("assigned_to"))
+                select_related("created_by").
+                prefetch_related("assigned_to", "comments__author"))
 
 
 class CommentViewSet(ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated, OnlyAuthorCanDeleteOrUpdateComment]
+    permission_classes = [IsAuthenticated, IsTaskCreatorOrAssignee, OnlyAuthorCanDeleteOrUpdateComment]
 
-    def get_queryset(self):
+    def get_task(self):
         task_id = self.kwargs.get("tasks_pk")
         task = get_object_or_404(Task, id=task_id)
+        return task
+
+    def get_queryset(self):
+        task = self.get_task()
         return Comment.objects.filter(task=task)
 
     def perform_create(self, serializer):
-        task_id = self.kwargs.get("tasks_pk")
-        task = get_object_or_404(Task, id=task_id)
+        task = self.get_task()
         return serializer.save(author=self.request.user, task=task)
