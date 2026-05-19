@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
 from .serializers import TaskSerializer, CommentSerializer
-from .models import Task, Comment
+from .models import Task, Comment,WorkSpace
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsCreatorOrReadOnly, IsTaskCreatorOrAssignee, OnlyAuthorCanDeleteOrUpdateComment
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -11,6 +11,14 @@ from django.db.models import Q
 
 
 # Create your views here.
+
+
+class WorkspaceViewSet(ModelViewSet):
+    queryset = WorkSpace.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        return serializer.save(owner=self.request.user)
 
 
 class TaskViewSet(ModelViewSet):

@@ -6,6 +6,17 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
+class WorkSpace(models.Model):
+    title = models.CharField(max_length=255)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="workspaces")
+    members = models.ManyToManyField(User, blank=True, related_name="workspaces_member")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+
 class Task(models.Model):
     class StatusChoices(models.TextChoices):
         TODO = "todo", "todo"
@@ -23,6 +34,7 @@ class Task(models.Model):
     description = models.TextField()
     status = models.CharField(max_length=20, choices=StatusChoices, default=StatusChoices.TODO)
     priority = models.CharField(max_length=20, choices=PriorityChoices, default=PriorityChoices.LOW)
+    workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE, related_name="tasks")
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tasks")
     assigned_to = models.ManyToManyField(User, blank=True, related_name="assigned_tasks")
     created_at = models.DateTimeField(auto_now_add=True)
