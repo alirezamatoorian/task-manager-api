@@ -41,9 +41,9 @@ class TaskSerializer(serializers.ModelSerializer):
                   "due_date", "comments", "completed_at"]
         read_only_fields = ["id", "created_by", "created_at", "updated_at"]
 
-        def get_is_assigned_to_me(self, obj):
-            user = self.context.get("request").user
-            return user in obj.assigned_to.all()
+    def get_is_assigned_to_me(self, obj):
+        user = self.context.get("request").user
+        return user in obj.assigned_to.all()
 
     def validate(self, attrs):
         user = self.context["request"].user

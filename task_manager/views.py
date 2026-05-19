@@ -35,12 +35,12 @@ class TaskViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         workspace_id = self.kwargs.get("workspaces_pk")
-        workspace = WorkSpace.objects.get(id=workspace_id)
+        workspace = get_object_or_404(WorkSpace, id=workspace_id)
         return serializer.save(created_by=self.request.user, workspace=workspace)
 
     def get_queryset(self):
         workspace_id = self.kwargs.get("workspaces_pk")
-        workspace = WorkSpace.objects.get(id=workspace_id)
+        workspace = get_object_or_404(WorkSpace, id=workspace_id)
         return (Task.objects.filter(Q(created_by=self.request.user) | Q(assigned_to=self.request.user),
                                     workspace=workspace).distinct().
                 select_related("created_by").
