@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
-from .serializers import TaskSerializer, CommentSerializer
-from .models import Task, Comment,WorkSpace
+from .serializers import TaskSerializer, CommentSerializer, WorkSpaceSerializer
+from .models import Task, Comment, WorkSpace
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsCreatorOrReadOnly, IsTaskCreatorOrAssignee, OnlyAuthorCanDeleteOrUpdateComment
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -14,11 +14,14 @@ from django.db.models import Q
 
 
 class WorkspaceViewSet(ModelViewSet):
-    queryset = WorkSpace.objects.all()
+    serializer_class = WorkSpaceSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         return serializer.save(owner=self.request.user)
+
+    def get_queryset(self):
+        return WorkSpace.objects.filter(Q(ownner=self.request.user) | Q(members=self.request.user)).distinct()
 
 
 class TaskViewSet(ModelViewSet):
@@ -31,7 +34,9 @@ class TaskViewSet(ModelViewSet):
     pagination_class = TaskPagination
 
     def perform_create(self, serializer):
-        return serializer.save(created_by=self.request.user)
+        workspace_id = self.kwargs.get("workspaces_pk")
+        workspace = WorkSpace.objects.get(id=workspace_id)
+        return serializer.save(created_by=self.request.user, workspace=workspace)
 
     def get_queryset(self):
         return (Task.objects.filter(Q(created_by=self.request.user) | Q(assigned_to=self.request.user)).distinct().

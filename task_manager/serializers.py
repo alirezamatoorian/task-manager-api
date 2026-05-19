@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Task, Comment
+from .models import Task, Comment, WorkSpace
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
@@ -72,3 +72,10 @@ class TaskSerializer(serializers.ModelSerializer):
             task.completed_at = None
         task.save()
         return task
+
+
+class WorkSpaceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkSpace
+        fields = ["id", "title", "owner", "members", "created_at", "updated_at"]
+        read_only_fields = ["id", "owner", "created_at", "updated_at"]
