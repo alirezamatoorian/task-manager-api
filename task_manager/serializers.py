@@ -28,15 +28,22 @@ class TaskSerializer(serializers.ModelSerializer):
         source="assigned_to",
         write_only=True
     )
-    comments = CommentSerializer(many=True,read_only=True)
+    comments = CommentSerializer(many=True, read_only=True)
+    is_assigned_to_me = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
-        fields = ["id", "title", "description", "created_by", "assigned_to", "assigned_to_ids", "status", "priority",
+        fields = ["id", "title", "description", "created_by", "assigned_to", "assigned_to_ids", "is_assigned_to_me",
+                  "status",
+                  "priority",
                   "created_at",
                   "updated_at",
                   "due_date", "comments", "completed_at"]
         read_only_fields = ["id", "created_by", "created_at", "updated_at"]
+
+        def get_is_assigned_to_me(self, obj):
+            user = self.context.get("request").user
+            return user in obj.assigned_to.all()
 
     def validate(self, attrs):
         user = self.context["request"].user
