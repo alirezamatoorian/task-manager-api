@@ -21,7 +21,7 @@ class WorkspaceViewSet(ModelViewSet):
         return serializer.save(owner=self.request.user)
 
     def get_queryset(self):
-        return WorkSpace.objects.filter(Q(ownner=self.request.user) | Q(members=self.request.user)).distinct()
+        return WorkSpace.objects.filter(Q(owner=self.request.user) | Q(members=self.request.user)).distinct()
 
 
 class TaskViewSet(ModelViewSet):
@@ -39,7 +39,10 @@ class TaskViewSet(ModelViewSet):
         return serializer.save(created_by=self.request.user, workspace=workspace)
 
     def get_queryset(self):
-        return (Task.objects.filter(Q(created_by=self.request.user) | Q(assigned_to=self.request.user)).distinct().
+        workspace_id = self.kwargs.get("workspaces_pk")
+        workspace = WorkSpace.objects.get(id=workspace_id)
+        return (Task.objects.filter(Q(created_by=self.request.user) | Q(assigned_to=self.request.user),
+                                    workspace=workspace).distinct().
                 select_related("created_by").
                 prefetch_related("assigned_to", "comments__author"))
 
