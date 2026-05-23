@@ -75,7 +75,12 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 class WorkSpaceSerializer(serializers.ModelSerializer):
+    task_count = serializers.SerializerMethodField()
+
     class Meta:
         model = WorkSpace
-        fields = ["id", "title", "owner", "members", "created_at", "updated_at"]
+        fields = ["id", "title", "owner", "members", "task_count", "created_at", "updated_at"]
         read_only_fields = ["id", "owner", "created_at", "updated_at"]
+
+    def get_task_count(self, obj):
+        return obj.tasks.count()

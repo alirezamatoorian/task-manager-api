@@ -3,7 +3,7 @@ from rest_framework.viewsets import ModelViewSet
 from .serializers import TaskSerializer, CommentSerializer, WorkSpaceSerializer
 from .models import Task, Comment, WorkSpace
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsCreatorOrReadOnly, IsTaskCreatorOrAssignee, OnlyAuthorCanDeleteOrUpdateComment, \
+from .permissions import IsWorkspaceMemberAndTaskPermission, IsTaskCreatorOrAssignee, OnlyAuthorCanDeleteOrUpdateComment, \
     OnlyOwnerCanDeleteOrUpdateWorkspace
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -29,7 +29,7 @@ class WorkspaceViewSet(ModelViewSet):
 
 class TaskViewSet(ModelViewSet):
     serializer_class = TaskSerializer
-    permission_classes = [IsAuthenticated, IsCreatorOrReadOnly]
+    permission_classes = [IsAuthenticated, IsWorkspaceMemberAndTaskPermission]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ["status", "priority"]
     search_fields = ["title"]
@@ -44,10 +44,7 @@ class TaskViewSet(ModelViewSet):
     def get_queryset(self):
         workspace_id = self.kwargs.get("workspaces_pk")
         workspace = get_object_or_404(WorkSpace, id=workspace_id)
-        return (Task.objects.filter(Q(created_by=self.request.user) | Q(assigned_to=self.request.user),
-                                    workspace=workspace).distinct().
-                select_related("created_by").
-                prefetch_related("assigned_to", "comments__author"))
+        return Task.objects.filter(workspace=workspace, workspace__members=self.request.user)
 
 
 class CommentViewSet(ModelViewSet):

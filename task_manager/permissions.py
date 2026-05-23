@@ -1,10 +1,17 @@
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import BasePermission, SAFE_METHODS
-from .models import Task
+from .models import Task, WorkSpace
 
 
 # tasks permissions ---------------
-class IsCreatorOrReadOnly(BasePermission):
+class IsWorkspaceMemberAndTaskPermission(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        workspaces_id = view.kwargs.get("workspaces_pk")
+        workspace = get_object_or_404(WorkSpace, id=workspaces_id)
+        return request.user in workspace.members.all()
+
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
             return True
@@ -14,6 +21,8 @@ class IsCreatorOrReadOnly(BasePermission):
             return obj.created_by == request.user or request.user in obj.assigned_to.all()
         return False
 
+
+# permission for comments
 
 class IsTaskCreatorOrAssignee(BasePermission):
     def has_permission(self, request, view):
