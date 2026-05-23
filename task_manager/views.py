@@ -18,7 +18,9 @@ class WorkspaceViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        return serializer.save(owner=self.request.user)
+        workspace = serializer.save(owner=self.request.user)
+        workspace.members.add(self.request.user)
+        return workspace
 
     def get_queryset(self):
         return WorkSpace.objects.filter(Q(owner=self.request.user) | Q(members=self.request.user)).distinct()
