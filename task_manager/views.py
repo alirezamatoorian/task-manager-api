@@ -3,7 +3,8 @@ from rest_framework.viewsets import ModelViewSet
 from .serializers import TaskSerializer, CommentSerializer, WorkSpaceSerializer
 from .models import Task, Comment, WorkSpace
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsCreatorOrReadOnly, IsTaskCreatorOrAssignee, OnlyAuthorCanDeleteOrUpdateComment
+from .permissions import IsCreatorOrReadOnly, IsTaskCreatorOrAssignee, OnlyAuthorCanDeleteOrUpdateComment, \
+    OnlyOwnerCanDeleteOrUpdateWorkspace
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import TaskPagination
@@ -15,7 +16,7 @@ from django.db.models import Q
 
 class WorkspaceViewSet(ModelViewSet):
     serializer_class = WorkSpaceSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, OnlyOwnerCanDeleteOrUpdateWorkspace]
 
     def perform_create(self, serializer):
         workspace = serializer.save(owner=self.request.user)
