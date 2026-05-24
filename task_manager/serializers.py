@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework.generics import get_object_or_404
+
 from .models import Task, Comment, WorkSpace
 from django.utils import timezone
 from django.contrib.auth import get_user_model
@@ -47,8 +49,17 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         user = self.context["request"].user
-        task = self.instance
+        view = self.context["view"]
+        workspace_id = view.kwargs.get("workspaces_pk")
+        workspace = get_object_or_404(WorkSpace, id=workspace_id)
+        assigned_to = attrs.get("assigned_to")
+        if assigned_to:
+            workspace_members = workspace.members.all()
+            for assigned_user in assigned_to:
+                if assigned_user not in workspace_members:
+                    raise serializers.ValidationError("assigned user must be members of workspace")
         if self.instance:
+            task = self.instance
             if task.created_by == user:
                 return attrs
             if user in task.assigned_to.all():
