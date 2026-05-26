@@ -9,12 +9,24 @@ User = get_user_model()
 class WorkSpace(models.Model):
     title = models.CharField(max_length=255)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="workspaces")
-    members = models.ManyToManyField(User, blank=True, related_name="workspaces_member")
+    members = models.ManyToManyField(User, through="WorkSpaceMembership", blank=True, related_name="workspaces_member")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title
+
+
+class WorkSpaceMembership(models.Model):
+    class RoleChoices(models.TextChoices):
+        ADMIN = "admin", "admin"
+        OWNER = "owner", "owner"
+        MEMBER = "member", "member"
+
+    workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    role = models.CharField(choices=RoleChoices, default=RoleChoices.MEMBER)
+    joined_at = models.DateTimeField(auto_now_add=True)
 
 
 class Task(models.Model):
