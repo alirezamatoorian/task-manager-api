@@ -25,8 +25,16 @@ class WorkSpaceMembership(models.Model):
 
     workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    role = models.CharField(choices=RoleChoices, default=RoleChoices.MEMBER)
+    role = models.CharField(max_length=20, choices=RoleChoices, default=RoleChoices.MEMBER)
     joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["workspace", "user"],
+                name="unique_workspace_member"
+            )
+        ]
 
 
 class Task(models.Model):

@@ -1,9 +1,10 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
 from .serializers import TaskSerializer, CommentSerializer, WorkSpaceSerializer
-from .models import Task, Comment, WorkSpace
+from .models import Task, Comment, WorkSpace, WorkSpaceMembership
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsWorkspaceMemberAndTaskPermission, IsTaskCreatorOrAssignee, OnlyAuthorCanDeleteOrUpdateComment, \
+from .permissions import IsWorkspaceMemberAndTaskPermission, IsTaskCreatorOrAssignee, \
+    OnlyAuthorCanDeleteOrUpdateComment, \
     OnlyOwnerCanDeleteOrUpdateWorkspace
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -20,7 +21,8 @@ class WorkspaceViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         workspace = serializer.save(owner=self.request.user)
-        workspace.members.add(self.request.user)
+        WorkSpaceMembership.objects.create(workspace=workspace, user=self.request.user,
+                                           role=WorkSpaceMembership.RoleChoices.OWNER)
         return workspace
 
     def get_queryset(self):
