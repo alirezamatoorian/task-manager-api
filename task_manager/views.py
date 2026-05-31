@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
-from .serializers import TaskSerializer, CommentSerializer, WorkSpaceSerializer
+from .serializers import TaskSerializer, CommentSerializer, WorkSpaceSerializer, WorkSpaceMembershipSerializer
 from .models import Task, Comment, WorkSpace, WorkSpaceMembership
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsWorkspaceMemberAndTaskPermission, IsTaskCreatorOrAssignee, \
@@ -27,6 +27,21 @@ class WorkspaceViewSet(ModelViewSet):
 
     def get_queryset(self):
         return WorkSpace.objects.filter(Q(owner=self.request.user) | Q(members=self.request.user)).distinct()
+
+
+class WorkspaceMembershipViewSet(ModelViewSet):
+    serializer_class = WorkSpaceMembershipSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        workspace_id = self.kwargs.get("workspaces_pk")
+        workspace = get_object_or_404(WorkSpace, id=workspace_id)
+        return serializer.save(workspace=workspace)
+
+    def get_queryset(self):
+        workspace_id = self.kwargs.get("workspaces_pk")
+        workspace = get_object_or_404(WorkSpace, id=workspace_id)
+        return WorkSpaceMembership.objects.filter(workspace=workspace)
 
 
 class TaskViewSet(ModelViewSet):

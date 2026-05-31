@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-
-from .models import Task, Comment, WorkSpace
+from .models import Task, Comment, WorkSpace, WorkSpaceMembership
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
@@ -87,6 +86,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
 class WorkSpaceSerializer(serializers.ModelSerializer):
     task_count = serializers.SerializerMethodField()
+    members = AssignedToMiniSerializer(many=True)
 
     class Meta:
         model = WorkSpace
@@ -95,3 +95,10 @@ class WorkSpaceSerializer(serializers.ModelSerializer):
 
     def get_task_count(self, obj):
         return obj.tasks.count()
+
+
+class WorkSpaceMembershipSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkSpaceMembership
+        fields = ["id", "workspace", "user", "role", "joined_at"]
+        read_only_fields = ["id", "workspace", "joined_at"]
