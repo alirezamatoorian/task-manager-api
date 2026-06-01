@@ -102,3 +102,8 @@ class WorkSpaceMembershipSerializer(serializers.ModelSerializer):
         model = WorkSpaceMembership
         fields = ["id", "workspace", "user", "role", "joined_at"]
         read_only_fields = ["id", "workspace", "joined_at"]
+
+    def validate_role(self, value):
+        if value == WorkSpaceMembership.RoleChoices.OWNER:
+            raise serializers.ValidationError("cannot assign owner role")
+        return value
