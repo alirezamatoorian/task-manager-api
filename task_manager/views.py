@@ -5,7 +5,7 @@ from .models import Task, Comment, WorkSpace, WorkSpaceMembership
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsWorkspaceMemberAndTaskPermission, IsTaskCreatorOrAssignee, \
     OnlyAuthorCanDeleteOrUpdateComment, \
-    OnlyOwnerCanDeleteOrUpdateWorkspace
+    OnlyOwnerCanDeleteOrUpdateWorkspace, IsWorkspaceOwnerOrAdmin
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import TaskPagination
@@ -31,7 +31,7 @@ class WorkspaceViewSet(ModelViewSet):
 
 class WorkspaceMembershipViewSet(ModelViewSet):
     serializer_class = WorkSpaceMembershipSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsWorkspaceOwnerOrAdmin]
 
     def perform_create(self, serializer):
         workspace_id = self.kwargs.get("workspaces_pk")

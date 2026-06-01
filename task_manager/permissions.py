@@ -1,6 +1,6 @@
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import BasePermission, SAFE_METHODS
-from .models import Task, WorkSpace
+from .models import Task, WorkSpace, WorkSpaceMembership
 
 
 # tasks permissions ---------------
@@ -48,3 +48,20 @@ class OnlyOwnerCanDeleteOrUpdateWorkspace(BasePermission):
         if request.method in SAFE_METHODS:
             return True
         return obj.owner == request.user
+
+
+# membership permissions
+
+class IsWorkspaceOwnerOrAdmin(BasePermission):
+    def has_permission(self, request, view):
+        workspaces_id = view.kwargs.get("workspaces_pk")
+        workspace = get_object_or_404(WorkSpace, id=workspaces_id)
+        try:
+            membership = WorkSpaceMembership.objects.get(workspace=workspace, user=request.user)
+        except WorkSpaceMembership.DoesNotExist:
+            return False
+        if request.method in SAFE_METHODS:
+            return True
+        return (membership.role == WorkSpaceMembership.RoleChoices.OWNER
+                or membership.role == WorkSpaceMembership.RoleChoices.ADMIN)
+
