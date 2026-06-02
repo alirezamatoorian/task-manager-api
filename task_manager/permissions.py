@@ -64,4 +64,3 @@ class IsWorkspaceOwnerOrAdmin(BasePermission):
             return True
         return (membership.role == WorkSpaceMembership.RoleChoices.OWNER
                 or membership.role == WorkSpaceMembership.RoleChoices.ADMIN)
-
