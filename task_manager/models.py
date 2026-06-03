@@ -9,7 +9,7 @@ User = get_user_model()
 class WorkSpace(models.Model):
     title = models.CharField(max_length=255)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="workspaces")
-    members = models.ManyToManyField(User, through="WorkSpaceMembership", blank=True, related_name="workspaces_member")
+    members = models.ManyToManyField(User, through="WorkSpaceMembership", blank=True,related_name="workspaces_member")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -86,7 +86,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
 class WorkSpaceSerializer(serializers.ModelSerializer):
     task_count = serializers.SerializerMethodField()
-    members = AssignedToMiniSerializer(many=True)
+    members = AssignedToMiniSerializer(many=True,required=False)
 
     class Meta:
         model = WorkSpace
@@ -106,4 +106,7 @@ class WorkSpaceMembershipSerializer(serializers.ModelSerializer):
     def validate_role(self, value):
         if value == WorkSpaceMembership.RoleChoices.OWNER:
             raise serializers.ValidationError("cannot assign owner role")
+        if self.instance:
+            if self.instance.role == WorkSpaceMembership.RoleChoices.OWNER:
+                raise serializers.ValidationError("cannot assign owner role")
         return value

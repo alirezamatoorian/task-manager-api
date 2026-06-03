@@ -10,6 +10,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import TaskPagination
 from django.db.models import Q
+from rest_framework.exceptions import ValidationError,PermissionDenied
 
 
 # Create your views here.
@@ -37,6 +38,11 @@ class WorkspaceMembershipViewSet(ModelViewSet):
         workspace_id = self.kwargs.get("workspaces_pk")
         workspace = get_object_or_404(WorkSpace, id=workspace_id)
         return serializer.save(workspace=workspace)
+
+    def perform_destroy(self, instance):
+        if instance.role==WorkSpaceMembership.RoleChoices.OWNER:
+            raise PermissionDenied("owner can not be deleted")
+        instance.delete()
 
     def get_queryset(self):
         workspace_id = self.kwargs.get("workspaces_pk")
