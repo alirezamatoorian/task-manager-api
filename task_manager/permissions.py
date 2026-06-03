@@ -6,10 +6,10 @@ from .models import Task, WorkSpace, WorkSpaceMembership
 # tasks permissions ---------------
 class IsWorkspaceMemberAndTaskPermission(BasePermission):
     def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
         workspaces_id = view.kwargs.get("workspaces_pk")
         workspace = get_object_or_404(WorkSpace, id=workspaces_id)
+        if request.method in SAFE_METHODS:
+            return WorkSpaceMembership.objects.filter(workspace=workspace,user=request.user).exists()
         return request.user in workspace.members.all()
 
     def has_object_permission(self, request, view, obj):
