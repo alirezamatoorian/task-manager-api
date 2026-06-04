@@ -23,8 +23,8 @@ class WorkSpaceMembership(models.Model):
         OWNER = "owner", "owner"
         MEMBER = "member", "member"
 
-    workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE,related_name="membership")
+    user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="workspace_membership")
     role = models.CharField(max_length=20, choices=RoleChoices, default=RoleChoices.MEMBER)
     joined_at = models.DateTimeField(auto_now_add=True)
 

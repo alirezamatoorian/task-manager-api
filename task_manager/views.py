@@ -27,7 +27,7 @@ class WorkspaceViewSet(ModelViewSet):
         return workspace
 
     def get_queryset(self):
-        return WorkSpace.objects.filter(WorkSpaceMembership__user=self.request.user)
+        return WorkSpace.objects.filter(membership__user=self.request.user)
 
 
 class WorkspaceMembershipViewSet(ModelViewSet):

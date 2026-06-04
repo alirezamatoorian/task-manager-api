@@ -53,9 +53,8 @@ class TaskSerializer(serializers.ModelSerializer):
         workspace = get_object_or_404(WorkSpace, id=workspace_id)
         assigned_to = attrs.get("assigned_to")
         if assigned_to:
-            workspace_members = workspace.members.all()
             for assigned_user in assigned_to:
-                if assigned_user not in workspace_members:
+                if not WorkSpaceMembership.objects.filter(user=assigned_user,workspace=workspace).exists():
                     raise serializers.ValidationError("assigned user must be members of workspace")
         if self.instance:
             task = self.instance
