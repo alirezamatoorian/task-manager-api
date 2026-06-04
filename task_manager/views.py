@@ -10,7 +10,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import TaskPagination
 from django.db.models import Q
-from rest_framework.exceptions import ValidationError,PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 
 
 # Create your views here.
@@ -27,7 +27,7 @@ class WorkspaceViewSet(ModelViewSet):
         return workspace
 
     def get_queryset(self):
-        return WorkSpace.objects.filter(Q(owner=self.request.user) | Q(members=self.request.user)).distinct()
+        return WorkSpace.objects.filter(WorkSpaceMembership__user=self.request.user)
 
 
 class WorkspaceMembershipViewSet(ModelViewSet):
@@ -67,7 +67,8 @@ class TaskViewSet(ModelViewSet):
     def get_queryset(self):
         workspace_id = self.kwargs.get("workspaces_pk")
         workspace = get_object_or_404(WorkSpace, id=workspace_id)
-        return Task.objects.filter(workspace=workspace, workspace__members=self.request.user)
+        return (Task.objects.filter(workspace=workspace)
+                .prefetch_related("comments","assigned_to"))
 
 
 class CommentViewSet(ModelViewSet):
