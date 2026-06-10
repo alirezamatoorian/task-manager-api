@@ -3,9 +3,8 @@ from rest_framework.viewsets import ModelViewSet
 from .serializers import TaskSerializer, CommentSerializer, WorkSpaceSerializer, WorkSpaceMembershipSerializer
 from .models import Task, Comment, WorkSpace, WorkSpaceMembership
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsWorkspaceMemberAndTaskPermission, IsTaskCreatorOrAssignee, \
-    OnlyAuthorCanDeleteOrUpdateComment, \
-    OnlyOwnerCanDeleteOrUpdateWorkspace, IsWorkspaceOwnerOrAdmin
+from .permissions import IsWorkspaceMemberAndTaskPermission,OnlyOwnerCanDeleteOrUpdateWorkspace, CommentPermission, \
+     IsWorkspaceOwnerOrAdmin
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import TaskPagination
@@ -73,7 +72,7 @@ class TaskViewSet(ModelViewSet):
 
 class CommentViewSet(ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated, IsTaskCreatorOrAssignee, OnlyAuthorCanDeleteOrUpdateComment]
+    permission_classes = [IsAuthenticated,CommentPermission]
 
     def get_task(self):
         task_id = self.kwargs.get("tasks_pk")

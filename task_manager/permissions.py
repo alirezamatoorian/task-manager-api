@@ -57,19 +57,20 @@ class IsWorkspaceMemberAndTaskPermission(BasePermission):
 
 # permission for comments
 
-class IsWorkSpaceMember(BasePermission):
+class CommentPermission(BasePermission):
     def has_permission(self, request, view):
         task=view.get_task()
         workspace=task.workspace
         return WorkSpaceMembership.objects.filter(workspace=workspace,user=request.user).exists()
-
-
-
-
-
-class OnlyAuthorCanDeleteOrUpdateComment(BasePermission):
     def has_object_permission(self, request, view, obj):
-        if request.method not in SAFE_METHODS:
-            return obj.author == request.user
-        return True
+        workspace=obj.task.workspace
+        membership=WorkSpaceMembership.objects.get(user=request.user,workspace=workspace)
+        if request.method in SAFE_METHODS:
+            return True
+        if membership.role in [
+            WorkSpaceMembership.RoleChoices.OWNER,
+            WorkSpaceMembership.RoleChoices.ADMIN,
+        ] or obj.author == request.user:
+            return True
+        return False
 
