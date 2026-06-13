@@ -147,3 +147,16 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=500),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
+
+LOGGING = {
+    "version": 1,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"}
+    },
+    "loggers": {
+        "django.db.backends": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+        }
+    }
+}

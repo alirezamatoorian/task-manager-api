@@ -84,16 +84,14 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 class WorkSpaceSerializer(serializers.ModelSerializer):
-    task_count = serializers.SerializerMethodField()
-    members = AssignedToMiniSerializer(many=True,required=False)
+    tasks_count = serializers.IntegerField(read_only=True)
+    members = AssignedToMiniSerializer(many=True,required=False,read_only=True)
 
     class Meta:
         model = WorkSpace
-        fields = ["id", "title", "owner", "members", "task_count", "created_at", "updated_at"]
+        fields = ["id", "title", "owner", "members", "tasks_count", "created_at", "updated_at"]
         read_only_fields = ["id", "owner", "created_at", "updated_at"]
 
-    def get_task_count(self, obj):
-        return obj.tasks.count()
 
 
 class WorkSpaceMembershipSerializer(serializers.ModelSerializer):

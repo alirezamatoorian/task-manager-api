@@ -8,7 +8,7 @@ from .permissions import IsWorkspaceMemberAndTaskPermission,OnlyOwnerCanDeleteOr
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import TaskPagination
-from django.db.models import Q
+from django.db.models import Q, Count
 from rest_framework.exceptions import PermissionDenied
 
 
@@ -18,15 +18,14 @@ from rest_framework.exceptions import PermissionDenied
 class WorkspaceViewSet(ModelViewSet):
     serializer_class = WorkSpaceSerializer
     permission_classes = [IsAuthenticated, OnlyOwnerCanDeleteOrUpdateWorkspace]
-
     def perform_create(self, serializer):
         workspace = serializer.save(owner=self.request.user)
         WorkSpaceMembership.objects.create(workspace=workspace, user=self.request.user,
                                            role=WorkSpaceMembership.RoleChoices.OWNER)
         return workspace
-
     def get_queryset(self):
-        return WorkSpace.objects.filter(membership__user=self.request.user)
+        return (WorkSpace.objects.filter(membership__user=self.request.user).select_related("owner")
+                .prefetch_related("members")).annotate(tasks_count=Count("tasks"))
 
 
 class WorkspaceMembershipViewSet(ModelViewSet):
@@ -66,8 +65,7 @@ class TaskViewSet(ModelViewSet):
     def get_queryset(self):
         workspace_id = self.kwargs.get("workspaces_pk")
         workspace = get_object_or_404(WorkSpace, id=workspace_id)
-        return (Task.objects.filter(workspace=workspace)
-                .prefetch_related("comments","assigned_to"))
+        return Task.objects.filter(workspace=workspace).prefetch_related("comments", "assigned_to")
 
 
 class CommentViewSet(ModelViewSet):
