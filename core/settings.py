@@ -15,7 +15,7 @@ from datetime import timedelta
 from typing import cast
 
 from decouple import config
-from django.conf.global_settings import AUTH_USER_MODEL
+from django.conf.global_settings import AUTH_USER_MODEL, MEDIA_URL
 
 import task_manager.apps
 
@@ -129,6 +129,9 @@ USE_TZ = True
 STATIC_URL = 'static/'
 AUTH_USER_MODEL = 'account.User'
 
+
+MEDIA_URL="/media/"
+MEDIA_ROOT = BASE_DIR / 'media'
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Task Manager API",

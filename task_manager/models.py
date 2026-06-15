@@ -76,10 +76,9 @@ class Comment(models.Model):
 
 class TaskAttachment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="attachments")
-    file=models.FileField(upload_to="media/")
-    upload_by=models.ForeignKey(User, on_delete=models.CASCADE, related_name="task_attachments")
+    file=models.FileField(upload_to="attachments/")
+    uploaded_by=models.ForeignKey(User, on_delete=models.CASCADE, related_name="task_attachments")
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.file.name
