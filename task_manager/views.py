@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
-from .serializers import TaskSerializer, CommentSerializer, WorkSpaceSerializer, WorkSpaceMembershipSerializer
-from .models import Task, Comment, WorkSpace, WorkSpaceMembership
+from .serializers import TaskSerializer, CommentSerializer, WorkSpaceSerializer, WorkSpaceMembershipSerializer,TaskAttachmentSerializer
+from .models import Task, Comment, WorkSpace, WorkSpaceMembership, TaskAttachment
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsWorkspaceMemberAndTaskPermission,OnlyOwnerCanDeleteOrUpdateWorkspace, CommentPermission, \
      IsWorkspaceOwnerOrAdmin
@@ -31,10 +31,11 @@ class WorkspaceViewSet(ModelViewSet):
 class WorkspaceMembershipViewSet(ModelViewSet):
     serializer_class = WorkSpaceMembershipSerializer
     permission_classes = [IsAuthenticated, IsWorkspaceOwnerOrAdmin]
-
-    def perform_create(self, serializer):
+    def get_workspace(self):
         workspace_id = self.kwargs.get("workspaces_pk")
-        workspace = get_object_or_404(WorkSpace, id=workspace_id)
+        return get_object_or_404(WorkSpace, id=workspace_id)
+    def perform_create(self, serializer):
+        workspace =self.get_workspace()
         return serializer.save(workspace=workspace)
 
     def perform_destroy(self, instance):
@@ -43,8 +44,7 @@ class WorkspaceMembershipViewSet(ModelViewSet):
         instance.delete()
 
     def get_queryset(self):
-        workspace_id = self.kwargs.get("workspaces_pk")
-        workspace = get_object_or_404(WorkSpace, id=workspace_id)
+        workspace = self.get_workspace()
         return WorkSpaceMembership.objects.filter(workspace=workspace)
 
 
@@ -56,31 +56,42 @@ class TaskViewSet(ModelViewSet):
     search_fields = ["title"]
     ordering_fields = ["created_at"]
     pagination_class = TaskPagination
-
+    def get_workspace(self):
+        workspace_id = self.kwargs.get("workspaces_pk")
+        return get_object_or_404(WorkSpace, id=workspace_id)
     def perform_create(self, serializer):
-        workspace_id = self.kwargs.get("workspaces_pk")
-        workspace = get_object_or_404(WorkSpace, id=workspace_id)
+        workspace =self.get_workspace()
         return serializer.save(created_by=self.request.user, workspace=workspace)
-
     def get_queryset(self):
-        workspace_id = self.kwargs.get("workspaces_pk")
-        workspace = get_object_or_404(WorkSpace, id=workspace_id)
+        workspace = self.get_workspace()
         return Task.objects.filter(workspace=workspace).prefetch_related("comments", "assigned_to")
 
 
 class CommentViewSet(ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated,CommentPermission]
-
     def get_task(self):
         task_id = self.kwargs.get("tasks_pk")
         task = get_object_or_404(Task, id=task_id)
         return task
-
     def get_queryset(self):
         task = self.get_task()
         return Comment.objects.filter(task=task)
-
     def perform_create(self, serializer):
         task = self.get_task()
         return serializer.save(author=self.request.user, task=task)
+
+
+
+class TaskAttachmentViewSet(ModelViewSet):
+    serializer_class = TaskAttachmentSerializer
+    permission_classes = [IsAuthenticated]
+    def get_task(self):
+        task_id = self.kwargs.get("tasks_pk")
+        return get_object_or_404(Task, id=task_id)
+    def get_queryset(self):
+        task =self.get_task()
+        return TaskAttachment.objects.filter(task=task)
+    def perform_create(self, serializer):
+        task =self.get_task()
+        return serializer.save(uploaded_by=self.request.user,task=task)

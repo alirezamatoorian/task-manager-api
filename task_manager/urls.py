@@ -21,9 +21,14 @@ workspace_router.register("tasks", views.TaskViewSet, basename="tasks")
 task_router = routers.NestedSimpleRouter(workspace_router, "tasks", lookup="tasks")
 task_router.register("comments", views.CommentViewSet, basename="comments")
 
+#nested router fot task attachment
+attachment_router=routers.NestedSimpleRouter(workspace_router,"tasks",lookup="tasks")
+attachment_router.register("attachments", views.TaskAttachmentViewSet, basename="attachments")
+
 urlpatterns = [
     path('', include(router.urls)),
     path('',include(membership_router.urls)),
     path('', include(workspace_router.urls)),
-    path('', include(task_router.urls))
+    path('', include(task_router.urls)),
+    path('', include(attachment_router.urls)),
 ]

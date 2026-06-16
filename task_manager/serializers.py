@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-from .models import Task, Comment, WorkSpace, WorkSpaceMembership
+from .models import Task, Comment, WorkSpace, WorkSpaceMembership,TaskAttachment
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
@@ -19,6 +19,12 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ["id", "content", "author", "task", "created_at"]
         read_only_fields = ["id", "created_at", "author", "task"]
 
+class TaskAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskAttachment
+        fields=["id","file","task","uploaded_by","created_at"]
+        read_only_fields=["id","task","uploaded_by","created_at"]
+
 
 class TaskSerializer(serializers.ModelSerializer):
     assigned_to = AssignedToMiniSerializer(read_only=True, many=True)
@@ -31,12 +37,14 @@ class TaskSerializer(serializers.ModelSerializer):
     )
     comments = CommentSerializer(many=True, read_only=True)
     is_assigned_to_me = serializers.SerializerMethodField()
+    attachments=TaskAttachmentSerializer(many=True,read_only=True)
 
     class Meta:
         model = Task
         fields = ["id", "title", "description", "created_by", "assigned_to", "assigned_to_ids", "is_assigned_to_me",
                   "status",
                   "priority",
+                  "attachments",
                   "created_at",
                   "updated_at",
                   "due_date", "comments", "completed_at"]
