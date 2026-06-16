@@ -72,6 +72,9 @@ class Comment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="comments")
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.author.phone} for {self.task.title} "
+
 
 
 class TaskAttachment(models.Model):
