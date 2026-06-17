@@ -4,7 +4,7 @@ from .serializers import TaskSerializer, CommentSerializer, WorkSpaceSerializer,
 from .models import Task, Comment, WorkSpace, WorkSpaceMembership, TaskAttachment
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsWorkspaceMemberAndTaskPermission,OnlyOwnerCanDeleteOrUpdateWorkspace, CommentPermission, \
-     IsWorkspaceOwnerOrAdmin
+     IsWorkspaceOwnerOrAdmin,TaskAttachmentPermission
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import TaskPagination
@@ -85,7 +85,8 @@ class CommentViewSet(ModelViewSet):
 
 class TaskAttachmentViewSet(ModelViewSet):
     serializer_class = TaskAttachmentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,TaskAttachmentPermission]
+    http_method_names = ["post","get","delete"]
     def get_task(self):
         task_id = self.kwargs.get("tasks_pk")
         return get_object_or_404(Task, id=task_id)

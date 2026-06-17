@@ -74,3 +74,21 @@ class CommentPermission(BasePermission):
             return True
         return False
 
+
+# permission for task attachment
+class TaskAttachmentPermission(BasePermission):
+    def has_permission(self, request, view):
+        task=view.get_task()
+        workspace=task.workspace
+        return WorkSpaceMembership.objects.filter(workspace=workspace,user=request.user).exists()
+    def has_object_permission(self, request, view, obj):
+        membership=WorkSpaceMembership.objects.get(user=request.user,workspace=obj.task.workspace)
+        if request.method in SAFE_METHODS:
+            return True
+        if membership.role in [
+                WorkSpaceMembership.RoleChoices.OWNER,
+                WorkSpaceMembership.RoleChoices.ADMIN,]:
+            return True
+        if request.method == "DELETE":
+            return obj.uploaded_by==request.user
+        return False
