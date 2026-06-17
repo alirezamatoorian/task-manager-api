@@ -1,3 +1,5 @@
+import os
+
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from .models import Task, Comment, WorkSpace, WorkSpaceMembership,TaskAttachment
@@ -24,6 +26,23 @@ class TaskAttachmentSerializer(serializers.ModelSerializer):
         model = TaskAttachment
         fields=["id","file","task","uploaded_by","created_at"]
         read_only_fields=["id","task","uploaded_by","created_at"]
+
+    def validate_file(self, value):
+        max_size=5*1024*1024
+        if value.size > max_size:
+            raise serializers.ValidationError("file size is too big")
+        allowed_extensions = {
+            ".pdf",
+            ".png",
+            ".jpg",
+            ".jpeg",
+        }
+        ext = os.path.splitext(value.name)[1].lower()
+        if ext not in allowed_extensions:
+            raise serializers.ValidationError(
+                "Unsupported file type."
+            )
+        return value
 
 
 class TaskSerializer(serializers.ModelSerializer):
