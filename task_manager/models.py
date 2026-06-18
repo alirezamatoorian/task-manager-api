@@ -79,7 +79,7 @@ class Comment(models.Model):
 
 class TaskAttachment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="attachments")
-    file=models.FileField(upload_to="attachments/")
+    file=models.FileField(upload_to="tasks/attachments/")
     uploaded_by=models.ForeignKey(User, on_delete=models.CASCADE, related_name="task_attachments")
     created_at = models.DateTimeField(auto_now_add=True)
 

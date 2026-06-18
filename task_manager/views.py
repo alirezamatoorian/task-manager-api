@@ -92,7 +92,7 @@ class TaskAttachmentViewSet(ModelViewSet):
         return get_object_or_404(Task, id=task_id)
     def get_queryset(self):
         task =self.get_task()
-        return TaskAttachment.objects.filter(task=task)
+        return TaskAttachment.objects.filter(task=task).select_related("task__workspace")
     def perform_create(self, serializer):
         task =self.get_task()
         return serializer.save(uploaded_by=self.request.user,task=task)
