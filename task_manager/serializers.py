@@ -14,7 +14,7 @@ class ActivityLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivityLog
         fields=["id", "user","workspace","action","description", "created_at"]
-        read_only_fields = ["id", "user","workspace","action","description", "created_at"]
+        read_only_fields = fields
 
 class AssignedToMiniSerializer(serializers.ModelSerializer):
     class Meta:
