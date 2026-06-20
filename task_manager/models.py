@@ -90,9 +90,13 @@ class TaskAttachment(models.Model):
 
 
 class ActivityLog(models.Model):
+    class ActionChoices(models.TextChoices):
+        CREATE = "create", "create"
+        UPDATE = "update", "update"
+        DELETE = "delete", "delete"
     workspace=models.ForeignKey(WorkSpace, on_delete=models.CASCADE,related_name="activity_logs")
     user=models.ForeignKey(User, on_delete=models.CASCADE,related_name="activity_logs")
-    action = models.CharField(max_length=255)
+    action = models.CharField(max_length=20,choices=ActionChoices)
     description=models.TextField()
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()

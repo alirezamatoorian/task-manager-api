@@ -2,12 +2,19 @@ import os
 
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-from .models import Task, Comment, WorkSpace, WorkSpaceMembership,TaskAttachment
+from .models import Task, Comment, WorkSpace, WorkSpaceMembership, TaskAttachment, ActivityLog
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
+
+class ActivityLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ActivityLog
+        fields=["id", "user","workspace","action","description", "created_at"]
+        read_only_fields = ["id", "user","workspace","action","description", "created_at"]
 
 class AssignedToMiniSerializer(serializers.ModelSerializer):
     class Meta:

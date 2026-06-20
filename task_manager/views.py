@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.viewsets import ModelViewSet
-from .serializers import TaskSerializer, CommentSerializer, WorkSpaceSerializer, WorkSpaceMembershipSerializer,TaskAttachmentSerializer
+from rest_framework.viewsets import ModelViewSet,ReadOnlyModelViewSet
+from .serializers import (TaskSerializer, CommentSerializer, WorkSpaceSerializer, WorkSpaceMembershipSerializer,
+                          TaskAttachmentSerializer,ActivityLogSerializer)
 from .models import Task, Comment, WorkSpace, WorkSpaceMembership, TaskAttachment,ActivityLog
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsWorkspaceMemberAndTaskPermission,OnlyOwnerCanDeleteOrUpdateWorkspace, CommentPermission, \
@@ -62,8 +63,17 @@ class TaskViewSet(ModelViewSet):
     def perform_create(self, serializer):
         workspace =self.get_workspace()
         task=serializer.save(created_by=self.request.user, workspace=workspace)
-        ActivityLog.objects.create(workspace=workspace, user=self.request.user,action=f"created task",description=f"{task.title} created")
+        ActivityLog.objects.create(workspace=workspace, user=self.request.user,target=task,action=ActivityLog.ActionChoices.CREATE,description=f"{task.title} created")
         return task
+    def perform_update(self, serializer):
+        workspace =self.get_workspace()
+        task=serializer.save()
+        ActivityLog.objects.create(workspace=workspace, user=self.request.user,target=task,action=ActivityLog.ActionChoices.UPDATE,description=f"{task.title} updated")
+    def perform_destroy(self, instance):
+        workspace =self.get_workspace()
+        task=instance
+        ActivityLog.objects.create(workspace=workspace, user=self.request.user,target=task,action=ActivityLog.ActionChoices.DELETE,description=f"{task.title} deleted")
+        instance.delete()
     def get_queryset(self):
         workspace = self.get_workspace()
         return Task.objects.filter(workspace=workspace).prefetch_related("comments", "assigned_to")
@@ -98,3 +108,9 @@ class TaskAttachmentViewSet(ModelViewSet):
     def perform_create(self, serializer):
         task =self.get_task()
         return serializer.save(uploaded_by=self.request.user,task=task)
+
+
+class ActivityLogViewSet(ReadOnlyModelViewSet):
+    serializer_class = ActivityLogSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = ActivityLog.objects.all()

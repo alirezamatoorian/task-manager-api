@@ -13,6 +13,10 @@ router.register("workspaces", views.WorkspaceViewSet, basename="workspaces")
 membership_router = routers.NestedSimpleRouter(router, "workspaces", lookup="workspaces")
 membership_router.register("members", views.WorkspaceMembershipViewSet, basename="members")
 
+#nested router for ActivityLog
+ActivityLog_router=routers.NestedSimpleRouter(router,"workspaces",lookup="workspaces")
+ActivityLog_router.register("activities", views.ActivityLogViewSet, basename="activities")
+
 #nested router for tasks
 workspace_router = routers.NestedSimpleRouter(router, "workspaces", lookup="workspaces")
 workspace_router.register("tasks", views.TaskViewSet, basename="tasks")
@@ -31,4 +35,5 @@ urlpatterns = [
     path('', include(workspace_router.urls)),
     path('', include(task_router.urls)),
     path('', include(attachment_router.urls)),
+    path('',include(ActivityLog_router.urls))
 ]
