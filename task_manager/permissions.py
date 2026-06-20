@@ -92,3 +92,9 @@ class TaskAttachmentPermission(BasePermission):
         if request.method == "DELETE":
             return obj.uploaded_by==request.user
         return False
+
+class ActivityLogPermission(BasePermission):
+    def has_permission(self, request, view):
+        workspace_id=view.kwargs.get("workspaces_pk")
+        workspace=get_object_or_404(WorkSpace, id=workspace_id)
+        return WorkSpaceMembership.objects.filter(workspace=workspace,user=request.user).exists()

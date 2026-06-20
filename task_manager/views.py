@@ -5,7 +5,7 @@ from .serializers import (TaskSerializer, CommentSerializer, WorkSpaceSerializer
 from .models import Task, Comment, WorkSpace, WorkSpaceMembership, TaskAttachment,ActivityLog
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsWorkspaceMemberAndTaskPermission,OnlyOwnerCanDeleteOrUpdateWorkspace, CommentPermission, \
-     IsWorkspaceOwnerOrAdmin,TaskAttachmentPermission
+     IsWorkspaceOwnerOrAdmin,TaskAttachmentPermission,ActivityLogPermission
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import TaskPagination
@@ -112,5 +112,8 @@ class TaskAttachmentViewSet(ModelViewSet):
 
 class ActivityLogViewSet(ReadOnlyModelViewSet):
     serializer_class = ActivityLogSerializer
-    permission_classes = [IsAuthenticated]
-    queryset = ActivityLog.objects.all()
+    permission_classes = [IsAuthenticated,ActivityLogPermission]
+    def get_queryset(self):
+        workspace_id = self.kwargs.get("workspaces_pk")
+        workspace=get_object_or_404(WorkSpace, id=workspace_id)
+        return ActivityLog.objects.filter(workspace=workspace)
