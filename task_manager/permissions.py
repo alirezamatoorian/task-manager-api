@@ -82,7 +82,7 @@ class TaskAttachmentPermission(BasePermission):
         workspace=task.workspace
         return WorkSpaceMembership.objects.filter(workspace=workspace,user=request.user).exists()
     def has_object_permission(self, request, view, obj):
-        membership=WorkSpaceMembership.objects.get(user=request.user,workspace=obj.task.workspace)
+        membership=WorkSpaceMembership.objects.filter(user=request.user,workspace=obj.task.workspace).first()
         if request.method in SAFE_METHODS:
             return True
         if membership.role in [
