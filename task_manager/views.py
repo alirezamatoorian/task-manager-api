@@ -12,6 +12,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import TaskPagination
 from django.db.models import Q, Count, Model
 from rest_framework.exceptions import PermissionDenied
+from .services import TaskService
 
 
 # Create your views here.
@@ -63,12 +64,7 @@ class TaskViewSet(WorkspaceQueryMixin,ModelViewSet):
     pagination_class = TaskPagination
     def perform_create(self, serializer):
         workspace =self.get_workspace()
-        task=serializer.save(created_by=self.request.user, workspace=workspace)
-        ActivityLog.objects.create(workspace=workspace,
-                                   user=self.request.user,
-                                   target=task,
-                                   action=ActivityLog.ActionChoices.CREATE
-                                   ,description=f"{task.title} created")
+        TaskService.create_task(user=self.request.user,workspace=workspace,serializer=serializer)
     def perform_update(self, serializer):
         workspace =self.get_workspace()
         task=serializer.save()
@@ -79,13 +75,7 @@ class TaskViewSet(WorkspaceQueryMixin,ModelViewSet):
                                    description=f"{task.title} updated")
     def perform_destroy(self, instance):
         workspace =self.get_workspace()
-        task=instance
-        ActivityLog.objects.create(workspace=workspace,
-                                   user=self.request.user,
-                                   target=task
-                                   ,action=ActivityLog.ActionChoices.DELETE
-                                   ,description=f"{task.title} deleted")
-        instance.delete()
+        TaskService.delete_task(user=self.request.user,workspace=workspace,task=instance)
     def get_queryset(self):
         workspace = self.get_workspace()
         return Task.objects.filter(workspace=workspace).prefetch_related("comments", "assigned_to","attachments")
