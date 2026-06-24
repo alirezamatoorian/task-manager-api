@@ -13,6 +13,16 @@ class TaskService:
                                    action=ActivityLog.ActionChoices.CREATE,
                                    description=f"{task.title} created")
         return task
+    @staticmethod
+    def update_task(*,user,serializer):
+        with transaction.atomic():
+            task=serializer.save()
+            ActivityLog.objects.create(user=user
+                                       ,workspace=task.workspace,
+                                        target=task,
+                                        action=ActivityLog.ActionChoices.UPDATE,
+                                        description=f"{task.title} updated")
+    @staticmethod
     def delete_task(*,user,workspace,task):
         with transaction.atomic():
             ActivityLog.objects.create(workspace=workspace,user=user,target=task,
@@ -20,3 +30,34 @@ class TaskService:
                                        description=f"Task '{task.title}' deleted")
             task.delete()
 
+
+class CommentService:
+    @staticmethod
+    def create_comment(*,user,task,serializer):
+        with transaction.atomic():
+            comment=serializer.save(author=user,task=task)
+            ActivityLog.objects.create(user=user
+                                       , workspace=task.workspace,
+                                       target=comment,
+                                       action=ActivityLog.ActionChoices.CREATE,
+                                       description="comment created")
+        return comment
+    @staticmethod
+    def update_comment(*,user,serializer):
+        with transaction.atomic():
+            comment=serializer.save()
+            ActivityLog.objects.create(user=user
+                                       ,workspace=comment.task.workspace
+                                       ,target=comment
+                                       ,action=ActivityLog.ActionChoices.UPDATE
+                                       ,description="comment updated")
+        return comment
+    @staticmethod
+    def delete_comment(*,user,task,comment):
+        with transaction.atomic():
+            ActivityLog.objects.create(user=user
+                                       ,workspace=task.workspace
+                                       ,target=comment
+                                       ,action=ActivityLog.ActionChoices.DELETE,
+                                       description="comment deleted")
+            comment.delete()

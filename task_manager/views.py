@@ -1,5 +1,4 @@
 from django.shortcuts import get_object_or_404
-from django.template.context_processors import request
 from rest_framework.viewsets import ModelViewSet,ReadOnlyModelViewSet
 from .serializers import (TaskSerializer, CommentSerializer, WorkSpaceSerializer, WorkSpaceMembershipSerializer,
                           TaskAttachmentSerializer,ActivityLogSerializer)
@@ -12,7 +11,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import TaskPagination
 from django.db.models import Q, Count, Model
 from rest_framework.exceptions import PermissionDenied
-from .services import TaskService
+from .services import TaskService,CommentService
 
 
 # Create your views here.
@@ -67,12 +66,7 @@ class TaskViewSet(WorkspaceQueryMixin,ModelViewSet):
         TaskService.create_task(user=self.request.user,workspace=workspace,serializer=serializer)
     def perform_update(self, serializer):
         workspace =self.get_workspace()
-        task=serializer.save()
-        ActivityLog.objects.create(workspace=workspace,
-                                   user=self.request.user,
-                                   target=task,
-                                   action=ActivityLog.ActionChoices.UPDATE,
-                                   description=f"{task.title} updated")
+        TaskService.update_task(user=self.request.user,serializer=serializer)
     def perform_destroy(self, instance):
         workspace =self.get_workspace()
         TaskService.delete_task(user=self.request.user,workspace=workspace,task=instance)
@@ -89,27 +83,12 @@ class CommentViewSet(TaskQueryMixin,ModelViewSet):
         return Comment.objects.filter(task=task)
     def perform_create(self, serializer):
         task = self.get_task()
-        comment=serializer.save(author=self.request.user, task=task)
-        ActivityLog.objects.create(user=self.request.user
-                                   ,workspace=task.workspace,
-                                   target=comment,
-                                   action=ActivityLog.ActionChoices.CREATE,
-                                   description="comment created")
+        CommentService.create_comment(user=self.request.user,task=task,serializer=serializer)
     def perform_update(self, serializer):
-        comment=serializer.save()
-        ActivityLog.objects.create(user=self.request.user,
-                                   workspace=comment.task.workspace,
-                                   target=comment,
-                                   action=ActivityLog.ActionChoices.UPDATE,
-                                   description="comment updated")
+        CommentService.update_comment(user=self.request.user,serializer=serializer)
     def perform_destroy(self, instance):
-        ActivityLog.objects.create(user=self.request.user,
-                                   workspace=instance.task.workspace,
-                                   target=instance,
-                                   action=ActivityLog.ActionChoices.DELETE,
-                                   description="comment deleted")
-        instance.delete()
-
+        task=self.get_task()
+        CommentService.delete_comment(user=self.request.user,task=task,comment=instance)
 
 
 class TaskAttachmentViewSet(TaskQueryMixin,ModelViewSet):
