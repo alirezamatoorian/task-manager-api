@@ -22,10 +22,11 @@ class TaskService:
                                         target=task,
                                         action=ActivityLog.ActionChoices.UPDATE,
                                         description=f"{task.title} updated")
+            return task
     @staticmethod
-    def delete_task(*,user,workspace,task):
+    def delete_task(*,user,task):
         with transaction.atomic():
-            ActivityLog.objects.create(workspace=workspace,user=user,target=task,
+            ActivityLog.objects.create(workspace=task.workspace,user=user,target=task,
                                        action=ActivityLog.ActionChoices.DELETE,
                                        description=f"Task '{task.title}' deleted")
             task.delete()
@@ -53,11 +54,32 @@ class CommentService:
                                        ,description="comment updated")
         return comment
     @staticmethod
-    def delete_comment(*,user,task,comment):
+    def delete_comment(*,user,comment):
         with transaction.atomic():
             ActivityLog.objects.create(user=user
-                                       ,workspace=task.workspace
+                                       ,workspace=comment.task.workspace
                                        ,target=comment
                                        ,action=ActivityLog.ActionChoices.DELETE,
                                        description="comment deleted")
             comment.delete()
+
+
+class TaskAttachmentService:
+    @staticmethod
+    def create_attachment(*,user,task,serializer):
+        with transaction.atomic():
+            attachment=serializer.save(uploaded_by=user,task=task)
+            ActivityLog.objects.create(user=user,workspace=task.workspace
+                                       ,target=attachment
+                                       ,action=ActivityLog.ActionChoices.CREATE
+                                       ,description=f"{attachment.file.name} created")
+            return attachment
+    @staticmethod
+    def delete_attachment(*,user,attachment):
+        with transaction.atomic():
+            ActivityLog.objects.create(user=user
+                                       ,workspace=attachment.task.workspace
+                                       ,target=attachment
+                                       ,action=ActivityLog.ActionChoices.DELETE
+                                       ,description=f"{attachment.file.name} deleted")
+            attachment.delete()

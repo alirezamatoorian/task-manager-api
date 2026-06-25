@@ -11,7 +11,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import TaskPagination
 from django.db.models import Q, Count, Model
 from rest_framework.exceptions import PermissionDenied
-from .services import TaskService,CommentService
+from .services import TaskService,CommentService,TaskAttachmentService
 
 
 # Create your views here.
@@ -65,11 +65,9 @@ class TaskViewSet(WorkspaceQueryMixin,ModelViewSet):
         workspace =self.get_workspace()
         TaskService.create_task(user=self.request.user,workspace=workspace,serializer=serializer)
     def perform_update(self, serializer):
-        workspace =self.get_workspace()
         TaskService.update_task(user=self.request.user,serializer=serializer)
     def perform_destroy(self, instance):
-        workspace =self.get_workspace()
-        TaskService.delete_task(user=self.request.user,workspace=workspace,task=instance)
+        TaskService.delete_task(user=self.request.user,task=instance)
     def get_queryset(self):
         workspace = self.get_workspace()
         return Task.objects.filter(workspace=workspace).prefetch_related("comments", "assigned_to","attachments")
@@ -87,8 +85,7 @@ class CommentViewSet(TaskQueryMixin,ModelViewSet):
     def perform_update(self, serializer):
         CommentService.update_comment(user=self.request.user,serializer=serializer)
     def perform_destroy(self, instance):
-        task=self.get_task()
-        CommentService.delete_comment(user=self.request.user,task=task,comment=instance)
+        CommentService.delete_comment(user=self.request.user,comment=instance)
 
 
 class TaskAttachmentViewSet(TaskQueryMixin,ModelViewSet):
@@ -100,20 +97,9 @@ class TaskAttachmentViewSet(TaskQueryMixin,ModelViewSet):
         return TaskAttachment.objects.filter(task=task).select_related("task__workspace")
     def perform_create(self, serializer):
         task =self.get_task()
-        attachment=serializer.save(uploaded_by=self.request.user,task=task)
-        ActivityLog.objects.create(workspace=task.workspace,
-                                   user=self.request.user,
-                                   target=attachment,
-                                   action=ActivityLog.ActionChoices.CREATE,
-                                   description="attachment uploaded")
+        TaskAttachmentService.create_attachment(user=self.request.user,task=task,serializer=serializer)
     def perform_destroy(self, instance):
-        ActivityLog.objects.create(workspace=instance.task.workspace,
-                                   user=self.request.user,
-                                   target=instance,
-                                   action=ActivityLog.ActionChoices.DELETE,
-                                   description="attachment deleted"
-                                   )
-        instance.delete()
+        TaskAttachmentService.delete_attachment(user=self.request.user,attachment=instance)
 
 class ActivityLogViewSet(ReadOnlyModelViewSet):
     serializer_class = ActivityLogSerializer
