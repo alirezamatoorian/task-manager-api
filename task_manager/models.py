@@ -87,6 +87,11 @@ class TaskAttachment(models.Model):
 
     def __str__(self):
         return self.file.name
+    
+    def delete(self,*args,**kwargs):
+        if self.file:
+            self.file.delete(save=False)
+        super().delete(*args,**kwargs)
 
 
 class ActivityLog(models.Model):
