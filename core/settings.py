@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     "task_manager",
     'account',
+    "notifications",
 ]
 
 MIDDLEWARE = [

@@ -1,6 +1,6 @@
 from django.db.models import Model
 
-from .models import ActivityLog, Task, StatusChoices
+from .models import ActivityLog, Task
 from django.db import transaction
 from django.utils import timezone
 

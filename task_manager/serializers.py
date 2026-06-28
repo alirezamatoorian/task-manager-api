@@ -13,7 +13,7 @@ User = get_user_model()
 class ActivityLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivityLog
-        fields=["id", "user","workspace","action","description", "created_at"]
+        fields=["id", "user","workspace","target","action","description", "created_at"]
         read_only_fields = fields
 
 class AssignedToMiniSerializer(serializers.ModelSerializer):
@@ -94,7 +94,7 @@ class TaskSerializer(serializers.ModelSerializer):
             task = self.instance
             if task.created_by == user:
                 return attrs
-            if user in task.assigned_to.all():
+            if task.assigned_to.filter(id=user.id).exists():
                 allowed_fields = {"status"}
                 incoming_fields = set(attrs.keys())
                 if incoming_fields.issubset(allowed_fields):

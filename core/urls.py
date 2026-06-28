@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/task-manager/", include('task_manager.urls', namespace='task_manager')),
     path("api/account/", include('account.urls', namespace='account')),
+    path("api/notifications/", include('notifications.urls', namespace='notifications')),
 
     #swagger
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
