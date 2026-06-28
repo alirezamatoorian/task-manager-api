@@ -1,5 +1,8 @@
-from .models import ActivityLog
+from django.db.models import Model
+
+from .models import ActivityLog, Task, StatusChoices
 from django.db import transaction
+from django.utils import timezone
 
 
 class TaskService:
@@ -16,7 +19,15 @@ class TaskService:
     @staticmethod
     def update_task(*,user,serializer):
         with transaction.atomic():
+            instance_task=serializer.instance
+            old_status=instance_task.status
             task=serializer.save()
+            if old_status != Task.StatusChoices.DONE and task.StatusChoices.DONE:
+                task.completed_at=timezone.now()
+                task.save(update_fields=['completed_at'])
+            elif task.status != Task.StatusChoices.DONE and task.completed_at is not None:
+                task.completed_at=None
+                task.save(update_fields=['completed_at'])
             ActivityLog.objects.create(user=user
                                        ,workspace=task.workspace,
                                         target=task,

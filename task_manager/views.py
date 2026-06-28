@@ -101,10 +101,9 @@ class TaskAttachmentViewSet(TaskQueryMixin,ModelViewSet):
     def perform_destroy(self, instance):
         TaskAttachmentService.delete_attachment(user=self.request.user,attachment=instance)
 
-class ActivityLogViewSet(ReadOnlyModelViewSet):
+class ActivityLogViewSet(WorkspaceQueryMixin,ReadOnlyModelViewSet):
     serializer_class = ActivityLogSerializer
     permission_classes = [IsAuthenticated,ActivityLogPermission]
     def get_queryset(self):
-        workspace_id = self.kwargs.get("workspaces_pk")
-        workspace=get_object_or_404(WorkSpace, id=workspace_id)
+        workspace=self.get_workspace()
         return ActivityLog.objects.filter(workspace=workspace).select_related("user","workspace")

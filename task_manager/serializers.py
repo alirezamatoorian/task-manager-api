@@ -105,16 +105,16 @@ class TaskSerializer(serializers.ModelSerializer):
             )
         return attrs
 
-    def update(self, instance, validated_data):
-        old_status = instance.status
-        task = super().update(instance, validated_data)
-        if (old_status != task.StatusChoices.DONE
-                and task.status == task.StatusChoices.DONE):
-            task.completed_at = timezone.now()
-        elif task.status != task.StatusChoices.DONE:
-            task.completed_at = None
-        task.save()
-        return task
+    # def update(self, instance, validated_data):
+    #     old_status = instance.status
+    #     task = super().update(instance, validated_data)
+    #     if (old_status != task.StatusChoices.DONE
+    #             and task.status == task.StatusChoices.DONE):
+    #         task.completed_at = timezone.now()
+    #     elif task.status != task.StatusChoices.DONE:
+    #         task.completed_at = None
+    #     task.save()
+    #     return task
 
 
 class WorkSpaceSerializer(serializers.ModelSerializer):
