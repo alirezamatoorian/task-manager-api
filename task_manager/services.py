@@ -1,4 +1,3 @@
-
 from .models import ActivityLog, Task
 from django.db import transaction
 from django.utils import timezone
@@ -10,11 +9,11 @@ class TaskService:
     def create_task(*,user,workspace,serializer):
         with transaction.atomic():
             task=serializer.save(created_by=user,workspace=workspace)
-            assigned_users=serializer.validated_data.get('assigned_to_ids',[])
+            assigned_users=serializer.validated_data.get('assigned_to',[])
             for assigned_user in assigned_users:
                 if assigned_user != user:
                     NotificationService.create_notification(recipient=assigned_user,title="تسک جدید"
-                                                            ,description=f"تسک {task.title}به شما موحل شد" )
+                                                            ,message=f"تسک {task.title}به شما موحل شد " )
             ActivityLog.objects.create(workspace=workspace,
                                    user=user,
                                    target=task,
