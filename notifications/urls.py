@@ -5,7 +5,7 @@ from . import views
 app_name = 'notifications'
 
 router = DefaultRouter()
-router.register(r'notifications',views.NotificationViewSet.as_view(),basename='notifications')
+router.register(r'notifications',views.NotificationViewSet,basename='notifications')
 
 
 urlpatterns=[

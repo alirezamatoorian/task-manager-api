@@ -22,9 +22,14 @@ class NotificationViewSet(ModelViewSet):
         return Notification.objects.filter(recipient=self.request.user)
 
     @action(detail=True, methods=['patch'])
-    def mark_is_read(self):
+    def mark_is_read(self,request,pk=None):
         notification = self.get_object()
         notification.is_read = True
-        notification.save()
+        notification.save(update_fields=['is_read'])
         return Response({'message': 'notification marked as read'}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['patch'])
+    def all_marks_is_read(self,request):
+        self.get_queryset().filter(is_read=False).update(is_read=True)
+        return Response({'message': 'all notification marked as read'}, status=status.HTTP_200_OK)
 
