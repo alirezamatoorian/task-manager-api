@@ -19,7 +19,7 @@ class NotificationSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         is_read = attrs.get("is_read")
         if self.instance:
-            if self.instance.is_read == True and is_read == False:
+            if self.instance.is_read and is_read is False:
                 raise serializers.ValidationError({"is_read": "This field cannot be false"})
         return attrs
 
