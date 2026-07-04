@@ -13,7 +13,7 @@ class TaskService:
             for assigned_user in assigned_users:
                 if assigned_user != user:
                     NotificationService.create_notification(recipient=assigned_user,title="تسک جدید"
-                                                            ,message=f"تسک {task.title}به شما موحل شد " )
+                                                            ,message=f"تسک {task.title}به شما محول شد " )
             ActivityLog.objects.create(workspace=workspace,
                                    user=user,
                                    target=task,
@@ -25,13 +25,19 @@ class TaskService:
         with transaction.atomic():
             instance_task=serializer.instance
             old_status=instance_task.status
+            old_assigned_users=set(instance_task.assigned_to.values_list('id', flat=True))
             task=serializer.save()
-            if old_status != Task.StatusChoices.DONE and task.StatusChoices.DONE:
+            if old_status != Task.StatusChoices.DONE and task.status==Task.StatusChoices.DONE:
                 task.completed_at=timezone.now()
                 task.save(update_fields=['completed_at'])
             elif task.status != Task.StatusChoices.DONE and task.completed_at is not None:
                 task.completed_at=None
                 task.save(update_fields=['completed_at'])
+            new_assigned_users=set(task.assigned_to.values_list('id', flat=True))
+            for assigned_user in new_assigned_users:
+                if assigned_user.id not in old_assigned_users and assigned_user != user:
+                    NotificationService.create_notification(recipient=assigned_user,title="تسک جدید",
+                                                            message=f"تسک {task.title}به شما محول شد ")
             ActivityLog.objects.create(user=user
                                        ,workspace=task.workspace,
                                         target=task,
