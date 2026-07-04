@@ -1,3 +1,4 @@
+from account.models import User
 from .models import ActivityLog, Task
 from django.db import transaction
 from django.utils import timezone
@@ -58,6 +59,12 @@ class CommentService:
     def create_comment(*,user,task,serializer):
         with transaction.atomic():
             comment=serializer.save(author=user,task=task)
+            assigned_users=task.assigned_to.all()
+            for assigned_user in assigned_users:
+                if assigned_user != user:
+                    NotificationService.create_notification(recipient=assigned_user
+                                                            ,title=f"{task.title} کامنت جدید روی تسک",
+                                                            message=f"{user.phone} :روی تسک کامنت گذاشت {comment.content[:30]}")
             ActivityLog.objects.create(user=user
                                        , workspace=task.workspace,
                                        target=comment,
