@@ -26,7 +26,7 @@ class TaskService:
         with transaction.atomic():
             instance_task=serializer.instance
             old_status=instance_task.status
-            old_assigned_users=set(instance_task.assigned_to.values_list('id', flat=True))
+            old_assigned_users=set(instance_task.assigned_to.all())
             task=serializer.save()
             if old_status != Task.StatusChoices.DONE and task.status==Task.StatusChoices.DONE:
                 task.completed_at=timezone.now()
@@ -34,9 +34,9 @@ class TaskService:
             elif task.status != Task.StatusChoices.DONE and task.completed_at is not None:
                 task.completed_at=None
                 task.save(update_fields=['completed_at'])
-            new_assigned_users=set(task.assigned_to.values_list('id', flat=True))
+            new_assigned_users=set(task.assigned_to.all())-old_assigned_users
             for assigned_user in new_assigned_users:
-                if assigned_user.id not in old_assigned_users and assigned_user != user:
+                if assigned_user != user:
                     NotificationService.create_notification(recipient=assigned_user,title="تسک جدید",
                                                             message=f"تسک {task.title}به شما محول شد ")
             ActivityLog.objects.create(user=user
@@ -64,7 +64,12 @@ class CommentService:
                 if assigned_user != user:
                     NotificationService.create_notification(recipient=assigned_user
                                                             ,title=f"{task.title} کامنت جدید روی تسک",
-                                                            message=f"{user.phone} :روی تسک کامنت گذاشت {comment.content[:30]}")
+                                                            message=f"{user.get_full_name()} :روی تسک کامنت گذاشت {comment.content[:30]}")
+
+            if task.created_by != user and task.created_by not in assigned_users:
+                NotificationService.create_notification(recipient=task.created_by
+                                                        ,title=f"{task.title} کامنت جدید روی تسک",
+                                                        message=f"{user.get_full_name()} :روی تسک کامنت گذاشت {comment.content[:30]}")
             ActivityLog.objects.create(user=user
                                        , workspace=task.workspace,
                                        target=comment,
@@ -79,7 +84,7 @@ class CommentService:
                                        ,workspace=comment.task.workspace
                                        ,target=comment
                                        ,action=ActivityLog.ActionChoices.UPDATE
-                                       ,description="comment updated")
+                                       ,description=f"comment {comment.id} updated")
         return comment
     @staticmethod
     def delete_comment(*,user,comment):
@@ -88,7 +93,7 @@ class CommentService:
                                        ,workspace=comment.task.workspace
                                        ,target=comment
                                        ,action=ActivityLog.ActionChoices.DELETE,
-                                       description="comment deleted")
+                                       description=f"comment {comment.id} با متن {comment.content[:30]} حذف شد")
             comment.delete()
 
 
@@ -97,6 +102,8 @@ class TaskAttachmentService:
     def create_attachment(*,user,task,serializer):
         with transaction.atomic():
             attachment=serializer.save(uploaded_by=user,task=task)
+            NotificationService.create_notification(recipient=task.created_by,title=f"file attachment in{task.title} ",
+                                                    message="file attachment created")
             ActivityLog.objects.create(user=user,workspace=task.workspace
                                        ,target=attachment
                                        ,action=ActivityLog.ActionChoices.CREATE
