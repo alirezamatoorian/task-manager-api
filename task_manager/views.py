@@ -78,7 +78,7 @@ class CommentViewSet(TaskQueryMixin,ModelViewSet):
     permission_classes = [IsAuthenticated,CommentPermission]
     def get_queryset(self):
         task = self.get_task()
-        return Comment.objects.filter(task=task)
+        return Comment.objects.filter(task=task).select_related("author")
     def perform_create(self, serializer):
         task = self.get_task()
         CommentService.create_comment(user=self.request.user,task=task,serializer=serializer)

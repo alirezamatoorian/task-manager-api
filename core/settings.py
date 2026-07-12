@@ -14,6 +14,7 @@ from pathlib import Path
 from datetime import timedelta
 from typing import cast
 
+import django_redis
 from decouple import config
 from django.conf.global_settings import AUTH_USER_MODEL, MEDIA_URL
 
@@ -164,3 +165,15 @@ SIMPLE_JWT = {
 #         }
 #     }
 # }
+
+CELERY_BROKER_URL ="redis://127.0.0.1:6379/0"
+
+CASHES={
+    "default":{
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION":"redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
