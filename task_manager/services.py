@@ -3,6 +3,7 @@ from .models import ActivityLog, Task
 from django.db import transaction
 from django.utils import timezone
 from notifications.services import NotificationService
+from notifications.tasks import  create_notification_task
 
 
 class TaskService:
@@ -13,8 +14,8 @@ class TaskService:
             assigned_users=serializer.validated_data.get('assigned_to',[])
             for assigned_user in assigned_users:
                 if assigned_user != user:
-                    NotificationService.create_notification(recipient=assigned_user,title="تسک جدید"
-                                                            ,message=f" تسک{task.title}به شما محول شد ")
+                    create_notification_task.delay(recipient_id=assigned_user.id,title="تسک جدید"
+                                              ,message=f" تسک{task.title}به شما محول شد ")
             ActivityLog.objects.create(workspace=workspace,
                                    user=user,
                                    target=task,
