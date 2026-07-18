@@ -1,8 +1,6 @@
-from account.models import User
 from .models import ActivityLog, Task
 from django.db import transaction
 from django.utils import timezone
-from notifications.services import NotificationService
 from notifications.tasks import  create_notification_task
 
 
@@ -38,7 +36,7 @@ class TaskService:
             new_assigned_users=set(task.assigned_to.all()) - old_assigned_users
             for assigned_user in new_assigned_users:
                 if assigned_user != user:
-                    NotificationService.create_notification(recipient=assigned_user,title="تسک جدید",
+                    create_notification_task.delay(recipient_id=assigned_user.id,title="تسک جدید",
                                                             message=f"تسک {task.title}به شما محول شد ")
             ActivityLog.objects.create(user=user
                                        ,workspace=task.workspace,
@@ -62,7 +60,7 @@ class CommentService:
             comment=serializer.save(author=user,task=task)
             recipients=(set(task.assigned_to.all()) | {task.created_by}) - {user}
             for recipient in recipients:
-                NotificationService.create_notification(recipient=recipient,
+                create_notification_task.delay(recipient_id=recipient.id,
                                                         title=f" کامنت جدید در{task.title} ",
                                                         message=f"{user.phone} کامنت نوشت "
                                                         )
@@ -101,7 +99,7 @@ class TaskAttachmentService:
             # assigned_users=task.assigned_to.all()
             recipients=(set(task.assigned_to.all()) | {task.created_by}) - {user}
             for recipient in recipients:
-                NotificationService.create_notification(recipient=recipient,
+                create_notification_task.delay(recipient_id=recipient.id,
                                                         title=f"فایلی در {task.title} آپلود شد ",
                                                         message=f"{user.phone} آپلود کرد {attachment.file.name}")
             # for assigned_user in assigned_users:
