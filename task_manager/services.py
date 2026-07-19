@@ -106,7 +106,7 @@ class TaskAttachmentService:
     def create_attachment(*, user, task, serializer):
         with transaction.atomic():
             attachment = serializer.save(uploaded_by=user, task=task)
-            # assigned_users=task.assigned_to.all()
+            # notify all task members except the uploader
             recipients = (set(task.assigned_to.all()) | {task.created_by}) - {user}
             for recipient in recipients:
                 transaction.on_commit(
@@ -114,13 +114,6 @@ class TaskAttachmentService:
                                                title=f"فایلی در {task.title} آپلود شد ",
                                                message=f"{user.phone} آپلود کرد {attachment.file.name}")
                 )
-            # for assigned_user in assigned_users:
-            #     if assigned_user != user:
-            #         NotificationService.create_notification(recipient=assigned_user,title=f"file attachment to {task.title} ",
-            #                                         message=f"{user.phone} uploaded {attachment.file.name}")
-            # if task.created_by != user and task.created_by not in assigned_users:
-            #     NotificationService.create_notification(recipient=task.created_by,title=f"file attachment to {task.title} ",
-            #                                             message=f"{user.phone} uploaded {attachment.file.name}")
             ActivityLog.objects.create(user=user, workspace=task.workspace
                                        , target=attachment
                                        , action=ActivityLog.ActionChoices.CREATE
