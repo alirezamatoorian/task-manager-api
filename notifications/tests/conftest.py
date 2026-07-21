@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 from notifications.models import Notification
+from notifications.services import NotificationService
 User=get_user_model()
 
 
@@ -10,14 +11,5 @@ def user():
     return User.objects.create_user(phone='09353045287', password='shahrivar1380')
 
 @pytest.fixture
-def notification():
-    return Notification.objects.create(recipient=user,title="welcome")
-
-
-@pytest.fixture
-def sample_num():
-    return 5
-
-@pytest.fixture
-def sample_name():
-    return "alireza"
+def notification(user):
+    return NotificationService.create_notification(recipient_id=user.id,title="welcome",message="Thanks for signing up")
