@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from .serializers import SignUpSerializer, ProfileSerializer, ChangePasswordSerializer, LogoutSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 User = get_user_model()
 
@@ -15,6 +15,7 @@ User = get_user_model()
 class SignUpView(CreateAPIView):
     queryset = User.objects.all()
     serializer_class = SignUpSerializer
+    permission_classes = [AllowAny]
 
 
 class ProfileView(RetrieveUpdateAPIView):

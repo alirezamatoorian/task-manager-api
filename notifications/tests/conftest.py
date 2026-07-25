@@ -14,3 +14,9 @@ def user():
 @pytest.fixture
 def notification(user):
     return NotificationService.create_notification(recipient_id=user.id,title="welcome",message="Thanks for signing up")
+
+
+
+@pytest.fixture
+def api_client():
+    return APIClient()
