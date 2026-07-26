@@ -12,6 +12,10 @@ def user():
     return User.objects.create_user(phone='09353045287', password='shahrivar1380')
 
 @pytest.fixture
+def other_user():
+    return User.objects.create_user(phone='09120473601', password='mordad1344')
+
+@pytest.fixture
 def notification(user):
     return NotificationService.create_notification(recipient_id=user.id,title="welcome",message="Thanks for signing up")
 
