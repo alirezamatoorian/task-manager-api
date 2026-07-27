@@ -2,9 +2,14 @@ import pytest
 from django.contrib.auth import get_user_model
 from notifications.services import NotificationService
 from rest_framework.test import APIClient
+
 User=get_user_model()
 
 
+
+@pytest.fixture
+def api_client():
+    return APIClient()
 
 @pytest.fixture
 def user():
@@ -18,8 +23,10 @@ def other_user():
 def notification(user):
     return NotificationService.create_notification(recipient_id=user.id,title="welcome",message="Thanks for signing up")
 
-
-
 @pytest.fixture
-def api_client():
-    return APIClient()
+def notification_factory():
+    def factory(recipient,title="test", message="test"):
+        return NotificationService.create_notification(recipient_id=recipient.id,
+                                                       title=title,
+                                                       message=message)
+    return factory
