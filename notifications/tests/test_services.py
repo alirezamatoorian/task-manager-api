@@ -5,7 +5,7 @@ from notifications.services import NotificationService
 
 User = get_user_model()
 
-pytestmark=pytest.mark.django_db
+pytestmark=pytest.mark.django_db(transaction=True)
 
 
 
@@ -22,7 +22,3 @@ def test_create_two_notifications(user):
     NotificationService.create_notification(recipient_id=user.id, title="first", message="first")
     NotificationService.create_notification(recipient_id=user.id, title="second", message="second")
     assert Notification.objects.count() == 2
-#
-# def test_create_notification_with_invalid_reception_raise_error(user):
-#     with pytest.raises(Exception):
-#         NotificationService.create_notification(recipient_id=9999, title="first", message="first")
