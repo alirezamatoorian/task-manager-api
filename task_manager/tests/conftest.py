@@ -24,7 +24,7 @@ def other_user():
 @pytest.fixture
 def workspace(user):
     workspace=WorkSpace.objects.create(title="workspace1",owner=user)
-    WorkSpaceMembership.objects.create(workspace=workspace,user=user)
+    WorkSpaceMembership.objects.create(workspace=workspace,user=user,role=WorkSpaceMembership.RoleChoices.OWNER)
     return workspace
 
 @pytest.fixture
