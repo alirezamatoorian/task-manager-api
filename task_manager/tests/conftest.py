@@ -4,6 +4,8 @@ from django.contrib.auth import get_user_model
 from task_manager.models import Task,WorkSpace,WorkSpaceMembership
 import tempfile
 import shutil
+from unittest.mock import MagicMock
+from ..serializers import TaskSerializer
 
 
 User = get_user_model()
@@ -37,3 +39,21 @@ def use_temp_media_root(settings):
     settings.MEDIA_ROOT = temp_dir
     yield
     shutil.rmtree(temp_dir)
+
+
+@pytest.fixture
+def make_task_serializer(workspace,user):
+    def _make(data=None, **context_overrides):
+        if data is None:
+            data = {"title": "New Task", "description": "task description"}
+
+        request = MagicMock()
+        request.user = context_overrides.get("request_user", user)
+
+        view = MagicMock()
+        view.kwargs = {"workspaces_pk": workspace.id}
+
+        serializer = TaskSerializer(data=data, context={"request": request, "view": view})
+        serializer.is_valid(raise_exception=True)
+        return serializer
+    return _make

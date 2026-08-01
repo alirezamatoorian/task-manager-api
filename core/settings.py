@@ -14,6 +14,7 @@ from pathlib import Path
 from datetime import timedelta
 from typing import cast
 
+import corsheaders
 import django_redis
 from decouple import config
 from django.conf.global_settings import AUTH_USER_MODEL, MEDIA_URL
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "django_filters",
     'drf_spectacular',
+    "corsheaders",
     "task_manager",
     'account',
     "notifications",
@@ -55,6 +57,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -63,6 +66,11 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'core.urls'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
 
 TEMPLATES = [
     {
