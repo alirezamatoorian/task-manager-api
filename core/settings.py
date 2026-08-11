@@ -12,12 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
-from typing import cast
-
-import corsheaders
-import django_redis
 from decouple import config
-from django.conf.global_settings import AUTH_USER_MODEL, MEDIA_URL
 
 import task_manager.apps
 
