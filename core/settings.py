@@ -173,12 +173,12 @@ SIMPLE_JWT = {
 #     }
 # }
 
-CELERY_BROKER_URL ="redis://127.0.0.1:6379/0"
+CELERY_BROKER_URL =config("CELERY_BROKER_URL")
 
-CASHES={
+CACHES={
     "default":{
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION":"redis://127.0.0.1:6379/1",
+        "LOCATION":config("REDIS_CACHE_URL"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }

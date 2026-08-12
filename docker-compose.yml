@@ -10,6 +10,8 @@ services:
       depends_on:
         db:
             condition: service_healthy
+        redis:
+          condition: service_started
     db:
       image: postgres:16
       ports:
@@ -23,9 +25,19 @@ services:
       volumes:
         - pgdata:/var/lib/postgresql/data
       healthcheck:
-        test: ["CMD-SHELL","pg_isready -U ${DB_USER}"]
+        test: ["CMD-SHELL","pg_isready -U ${DB_USER} -d ${DB_NAME}"]
         interval: 5s
         timeout: 5s
         retries: 5
+    celery:
+      build: .
+      command:
+        - celery -A worker core
+      depends_on:
+        - redis
+    redis:
+      image: redis:7-alpine
+      ports:
+        - 6379:6379
 volumes:
   pgdata:
