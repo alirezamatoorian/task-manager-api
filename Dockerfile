@@ -9,13 +9,16 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app
 
-#RUN apt-get update && apt-get install -y gosu && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y gosu && rm -rf /var/lib/apt/lists/*
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-#RUN useradd --create-home appuser && chown -R appuser:appuser /app
+RUN useradd --create-home appuser && chown -R appuser:appuser /app
 
+#unroor user without nginx
+#RUN useradd --create-home appuser && chown -R appuser:appuser /app
+#USER appuser
 
 EXPOSE 8000
 
