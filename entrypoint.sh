@@ -18,7 +18,7 @@ gosu appuser python manage.py collectstatic --noinput
 #python manage.py collectstatic --noinput
 
 
-#for root user with nginx
+#for unroot user with nginx
 exec gosu appuser "$@"
 
 #exec "$@"

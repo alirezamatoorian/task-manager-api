@@ -12,9 +12,13 @@ from .pagination import TaskPagination
 from django.db.models import Q, Count, Model
 from rest_framework.exceptions import PermissionDenied
 from .services import TaskService,CommentService,TaskAttachmentService
+from django.http import HttpResponse
 
 
 # Create your views here.
+
+def healthz(request):
+    return HttpResponse("ok",status=200)
 
 class WorkspaceQueryMixin:
     def get_workspace(self):

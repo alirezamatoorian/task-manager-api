@@ -35,5 +35,7 @@ urlpatterns = [
     path('', include(workspace_router.urls)),
     path('', include(task_router.urls)),
     path('', include(attachment_router.urls)),
-    path('',include(ActivityLog_router.urls))
+    path('',include(ActivityLog_router.urls)),
+
+    path('healthz/',views.healthz,name="healthz"),
 ]
