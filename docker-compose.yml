@@ -20,6 +20,7 @@ services:
         interval: 5s
         timeout: 5s
         retries: 5
+      restart: unless-stopped
     db:
       image: postgres:16
       env_file:
@@ -35,7 +36,7 @@ services:
         interval: 5s
         timeout: 5s
         retries: 5
-      restart: always
+      restart: unless-stopped
     celery:
       build: .
       command: celery -A core worker --loglevel=info
@@ -46,6 +47,7 @@ services:
           condition: service_healthy
         redis:
           condition: service_healthy
+      restart: unless-stopped
     redis:
       image: redis:7-alpine
       healthcheck:
@@ -53,7 +55,7 @@ services:
         interval: 5s
         timeout: 5s
         retries: 5
-      restart: always
+      restart: unless-stopped
     nginx:
       image: nginx:alpine
       ports:
@@ -65,6 +67,7 @@ services:
       depends_on:
         web:
           condition: service_healthy
+      restart: unless-stopped
 volumes:
   pgdata:
   static:
