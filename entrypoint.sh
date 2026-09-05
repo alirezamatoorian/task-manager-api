@@ -11,8 +11,13 @@ set -e
 #chown -R appuser:appuser /app/staticfiles /app/media
 
 #for nginx unroot user with celery
-gosu appuser python manage.py migrate --noinput
-gosu appuser python manage.py collectstatic --noinput
+#gosu appuser python manage.py migrate --noinput
+#gosu appuser python manage.py collectstatic --noinput
+
+if [ "$RUN_MIGRATIONS" = "true" ]; then
+    gosu appuser python manage.py migrate --noinput
+    gosu appuser python manage.py collectstatic --noinput
+fi
 
 #python manage.py migrate --noinput
 #python manage.py collectstatic --noinput

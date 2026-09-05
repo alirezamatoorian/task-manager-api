@@ -5,6 +5,8 @@ services:
       build: .
       env_file:
         - .env.docker
+      environment:
+        RUN_MIGRATIONS: "true"
       volumes:
         - static:/app/staticfiles
         - media:/app/media
@@ -14,7 +16,7 @@ services:
         redis:
           condition: service_healthy
       healthcheck:
-        test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz/')" ]
+        test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/task-manager/healthz/')" ]
         interval: 5s
         timeout: 5s
         retries: 5
@@ -33,6 +35,7 @@ services:
         interval: 5s
         timeout: 5s
         retries: 5
+      restart: always
     celery:
       build: .
       command: celery -A core worker --loglevel=info
@@ -50,6 +53,7 @@ services:
         interval: 5s
         timeout: 5s
         retries: 5
+      restart: always
     nginx:
       image: nginx:alpine
       ports:
